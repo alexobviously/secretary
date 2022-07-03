@@ -1,4 +1,4 @@
-name: Bishop Package Tests
+name: Secretary Package Tests
 
 on:
   push:

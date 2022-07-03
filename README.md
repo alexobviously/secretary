@@ -49,6 +49,8 @@ secretary.failureStream.listen((event) => recordFailure(event.key, event.error))
 
 Note that there is also `secretary.errorStream`, but this also includes errors which resulted in a retry, alongside ones that resulted in failure. You can also sort these yourself if you want to log them by checking `event.isFailure`.
 
+Also note that all `SecretaryEvent` objects, including successful ones, include a list of all errors they've encountered over all their attempts. In most cases, these will all be roughly the same as the final error, but you can access them with `event.errors`.
+
 ### Retry conditions
 Following on from the example above, what if you want to retry in general, but not for every error? For example, perhaps you get error [415 Unsupported Media Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/415) when uploading a file. This is an error which won't change however many times you retry it, so there's no point.
 Simply add a `retryIf` condition:
@@ -60,3 +62,5 @@ final secretary = Secretary<String, int>(
     retryIf: (error) => error != 415,
 );
 ```
+
+In this case, tasks that result in a 415 error will be declared failures, and you'll be able to see their events in the stream and log them as above.
