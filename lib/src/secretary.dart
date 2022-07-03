@@ -45,26 +45,59 @@ class Secretary<K, T> {
 
   late final _streamController =
       StreamController<SecretaryEvent<K, T>>.broadcast();
+
+  /// A stream of all events - success, retry and failure.
   Stream<SecretaryEvent<K, T>> get stream => _streamController.stream;
+
+  /// A stream of only successful execution events.
   Stream<SuccessEvent<K, T>> get successStream =>
       stream.where((e) => e.isSuccess).map((e) => e as SuccessEvent<K, T>);
+
+  /// A stream of results of successful task executions.
   Stream<T> get resultStream => successStream.map((e) => e.result);
+
+  /// A stream of all error events. This includes both errors that result in
+  /// retries, and ones that result in failure.
   Stream<ErrorEvent<K, T>> get errorStream =>
       stream.where((e) => e.isError).map((e) => e as ErrorEvent<K, T>);
 
+  /// A stream of task executions that ended in failure.
+  Stream<FailureEvent<K, T>> get failureStream =>
+      stream.where((e) => e.isFailure).map((e) => e as FailureEvent<K, T>);
+
+  /// A stream of task executions that were queued to be retried.
+  Stream<RetryEvent<K, T>> get retryStream =>
+      stream.where((e) => e.isRetry).map((e) => e as RetryEvent<K, T>);
+
+  /// A map linking all keys in the queue and active lists with their tasks.
   Map<K, SecretaryTask<K, T>> tasks = {};
+
+  /// Is there anything left to do?
+  bool get hasTasks => tasks.isNotEmpty;
+
+  /// All task keys waiting to be executed.
   List<K> queue = [];
+
+  /// All tasks currently being executed.
   List<K> active = [];
+
+  /// The last event that was logged.
   SecretaryEvent<K, T>? lastEvent;
 
   late final _stateStreamController =
       StreamController<SecretaryState>.broadcast();
+
+  /// A stream of Secretary's state.
   Stream<SecretaryState> get stateStream => _stateStreamController.stream;
+
+  /// The current state of the Secretary.
   SecretaryState state = SecretaryState.idle;
 
-  bool get hasTasks => tasks.isNotEmpty;
-
   /// Adds an item to the queue.
+  /// [key] is used to identify the task, and should conform to the K type
+  /// constraint of the Secretary. It isn't really important what the [key] is,
+  /// but note that tasks with keys that already exist in the queue will be rejected.
+  ///
   /// [task] should be a function that returns a Future<T>, where T is the T
   /// type constraint of the Secretary.
   ///
@@ -248,6 +281,7 @@ class Secretary<K, T> {
       task.onError?.call(event);
       _addEvent(event);
     } else {
+      tasks.remove(task.key);
       final event = FailureEvent.fromTask(task);
       task.onError?.call(event);
       _addEvent(event);
