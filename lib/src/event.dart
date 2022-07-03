@@ -8,11 +8,17 @@ class SecretaryEvent<K, T> {
   bool get isError => this is ErrorEvent;
   bool get isRetry => this is RetryEvent;
   bool get isFailure => this is FailureEvent;
+
+  @override
+  String toString() => 'SecretaryEvent($key)';
 }
 
 class SuccessEvent<K, T> extends SecretaryEvent<K, T> {
   final T result;
   const SuccessEvent({required super.key, required this.result});
+
+  @override
+  String toString() => 'SuccessEvent($key, $result)';
 }
 
 class ErrorEvent<K, T> extends SecretaryEvent<K, T> {
@@ -22,6 +28,9 @@ class ErrorEvent<K, T> extends SecretaryEvent<K, T> {
 
   Object get error => errors.last;
   int get attempts => errors.length;
+
+  @override
+  String toString() => 'ErrorEvent($key, $attempts, $error)';
 }
 
 class RetryEvent<K, T> extends ErrorEvent<K, T> {
@@ -40,6 +49,9 @@ class RetryEvent<K, T> extends ErrorEvent<K, T> {
         errors: [...task.errors],
         maxAttempts: task.maxAttempts,
       );
+
+  @override
+  String toString() => 'RetryEvent($key, $attempts/$maxAttempts, $error)';
 }
 
 class FailureEvent<K, T> extends ErrorEvent<K, T> {
@@ -52,4 +64,7 @@ class FailureEvent<K, T> extends ErrorEvent<K, T> {
         key: task.key,
         errors: task.errors,
       );
+
+  @override
+  String toString() => 'FailureEvent($key, $attempts, $error)';
 }
