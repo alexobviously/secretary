@@ -1,6 +1,7 @@
-typedef FutureFunction<T> = Future<T> Function();
+typedef Task<T> = Future<T> Function();
 typedef Validator<T> = Object? Function(T);
 typedef Callback<T> = T Function(T);
+typedef RetryTest = bool Function(Object?);
 
 enum SecretaryState {
   idle,

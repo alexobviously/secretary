@@ -4,14 +4,18 @@ import 'package:secretary/secretary.dart';
 
 class Secretary<K, T> {
   final Duration checkInterval;
+  final Duration retryDelay;
   final Validator<T>? validator;
+  final bool Function(Object?) retryIf;
   final RetryPolicy retryPolicy;
   final StopPolicy stopPolicy;
   final int maxAttempts;
 
   Secretary({
     this.checkInterval = const Duration(milliseconds: 50),
+    this.retryDelay = const Duration(milliseconds: 1000),
     this.validator,
+    this.retryIf = RetryIf.alwaysRetry,
     this.retryPolicy = RetryPolicy.backOfQueue,
     this.stopPolicy = StopPolicy.finishActive,
     this.maxAttempts = 1,
@@ -33,6 +37,9 @@ class Secretary<K, T> {
   List<K> queue = [];
   List<K> active = [];
   SecretaryState state = SecretaryState.idle;
+  SecretaryEvent<K, T>? lastEvent;
+
+  bool get hasTasks => tasks.isNotEmpty;
 
   void start() {
     state = SecretaryState.active;
@@ -45,6 +52,11 @@ class Secretary<K, T> {
 
   Future<void> dispose() async {
     _streamController.close();
+  }
+
+  void _addEvent(SecretaryEvent<K, T> event) {
+    _streamController.add(event);
+    lastEvent = event;
   }
 
   void _loop() async {
@@ -64,10 +76,11 @@ class Secretary<K, T> {
 
   void add(
     K key,
-    FutureFunction<T> task, {
+    Task<T> task, {
     Validator<T>? validator,
     Callback<T>? onComplete,
     RetryPolicy? retryPolicy,
+    Duration? retryDelay,
     int? maxAttempts,
   }) async {
     final item = SecretaryTask<K, T>(
@@ -76,6 +89,7 @@ class Secretary<K, T> {
       validator: validator ?? this.validator,
       onComplete: onComplete,
       retryPolicy: retryPolicy ?? this.retryPolicy,
+      retryDelay: retryDelay ?? this.retryDelay,
       maxAttempts: maxAttempts ?? this.maxAttempts,
     );
     tasks[key] = item;
@@ -95,6 +109,10 @@ class Secretary<K, T> {
     active.add(key);
     final task = tasks[key]!;
 
+    if (lastEvent != null && lastEvent!.isRetry && lastEvent!.key == key) {
+      await Future.delayed(task.retryDelay);
+    }
+
     T result = await task.task();
     Object? error;
 
@@ -106,7 +124,11 @@ class Secretary<K, T> {
     if (error == null) {
       tasks.remove(key);
       task.onComplete?.call(result);
-      _streamController.add(SuccessEvent(key: key, result: result));
+      _addEvent(SuccessEvent(
+        key: key,
+        result: result,
+        errors: task.errors,
+      ));
     } else {
       _handleError(key, error);
     }
@@ -114,6 +136,7 @@ class Secretary<K, T> {
 
   void _handleError(K key, Object error) {
     SecretaryTask<K, T> task = tasks[key]!.withError(error);
+    tasks[key] = task;
     if (task.canRetry) {
       switch (task.retryPolicy) {
         case RetryPolicy.backOfQueue:
@@ -123,9 +146,9 @@ class Secretary<K, T> {
           queue.insert(0, key);
           break;
       }
-      _streamController.add(RetryEvent.fromTask(task));
+      _addEvent(RetryEvent.fromTask(task));
     } else {
-      _streamController.add(FailureEvent.fromTask(task));
+      _addEvent(FailureEvent.fromTask(task));
     }
   }
 }

@@ -30,7 +30,7 @@ void main() {
 }
 
 class BasicTest<T> {
-  final List<FutureFunction<T>> tasks;
+  final List<Task<T>> tasks;
   final List<T> expected;
 
   Type get type => T;

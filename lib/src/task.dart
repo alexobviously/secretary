@@ -2,10 +2,11 @@ import 'package:secretary/secretary.dart';
 
 class SecretaryTask<K, T> {
   final K key;
-  final FutureFunction<T> task;
+  final Task<T> task;
   final Validator<T>? validator;
   final Callback<T>? onComplete;
   final RetryPolicy retryPolicy;
+  final Duration retryDelay;
   final int maxAttempts;
   final List<Object> errors;
 
@@ -18,16 +19,18 @@ class SecretaryTask<K, T> {
     this.validator,
     this.onComplete,
     required this.retryPolicy,
+    this.retryDelay = Duration.zero,
     required this.maxAttempts,
     this.errors = const [],
   });
 
   SecretaryTask<K, T> copyWith({
     K? key,
-    FutureFunction<T>? task,
+    Task<T>? task,
     Validator<T>? validator,
     Callback<T>? onComplete,
     RetryPolicy? retryPolicy,
+    Duration? retryDelay,
     int? maxAttempts,
     List<Object>? errors,
   }) =>
@@ -37,6 +40,7 @@ class SecretaryTask<K, T> {
         validator: validator ?? this.validator,
         onComplete: onComplete ?? this.onComplete,
         retryPolicy: retryPolicy ?? this.retryPolicy,
+        retryDelay: retryDelay ?? this.retryDelay,
         maxAttempts: maxAttempts ?? this.maxAttempts,
         errors: errors ?? this.errors,
       );
