@@ -11,7 +11,7 @@ void main(List<String> args) async {
     maxAttempts: 20,
     validator: (res) => res.ok ? null : res.error!,
     retryIf: (error) => error != 'invalid_name',
-    stopPolicy: StopPolicy.stopImmediately,
+    stopPolicy: StopPolicy.finishQueue,
     autostart: true,
   );
   secretary.resultStream.listen(printResult);

@@ -67,10 +67,32 @@ class Secretary<K, T> {
   /// Adds an item to the queue.
   /// [task] should be a function that returns a Future<T>, where T is the T
   /// type constraint of the Secretary.
+  ///
   /// If [index] is specified, then the item will be inserted at that point in
   /// the queue, otherwise it will be added to the end. A negative index can
   /// also be used, e.g. -1 will add the task as the second last element.
   ///
+  /// [onComplete] and [onError] will be called on completion and error events
+  /// for this task, respectively. These are not required; all of the events
+  /// for all tasks are passed to the streams in `Secretary`.
+  ///
+  /// All other parameters are optional overrides of the values the Secretary has.
+  ///
+  /// [validator] is function that will be called on results to determine if the
+  /// task succeeded.
+  /// It should return null if the task was considered a success, and the error otherwise.
+  ///
+  /// [retryIf] is a test to determine if a task should be retried or not.
+  /// Takes an error as an input (the result of [validator]), and returns a bool.
+  ///
+  /// [retryPolicy] dictates what to do with a task that needs to be retried,
+  /// i.e. should it return to the back of the queue or be retried immediately?
+  ///
+  /// [retryDelay] is the amount of time to wait before retrying a task,
+  /// if it was the last task attempted.
+  ///
+  /// [maxAttempts] is the maximum number of times to attempt a task before
+  /// marking it as failed.
   bool add(
     K key,
     Task<T> task, {
