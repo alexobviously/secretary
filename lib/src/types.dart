@@ -7,7 +7,6 @@ enum SecretaryState {
   idle,
   active,
   stopping,
-  stopped,
   disposed,
 }
 

@@ -36,43 +36,14 @@ class Secretary<K, T> {
   Map<K, SecretaryTask<K, T>> tasks = {};
   List<K> queue = [];
   List<K> active = [];
-  SecretaryState state = SecretaryState.idle;
   SecretaryEvent<K, T>? lastEvent;
 
+  late final _stateStreamController =
+      StreamController<SecretaryState>.broadcast();
+  Stream<SecretaryState> get stateStream => _stateStreamController.stream;
+  SecretaryState state = SecretaryState.idle;
+
   bool get hasTasks => tasks.isNotEmpty;
-
-  void start() {
-    state = SecretaryState.active;
-    _loop();
-  }
-
-  void stop() {
-    state = SecretaryState.stopping;
-  }
-
-  Future<void> dispose() async {
-    _streamController.close();
-  }
-
-  void _addEvent(SecretaryEvent<K, T> event) {
-    _streamController.add(event);
-    lastEvent = event;
-  }
-
-  void _loop() async {
-    while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
-      if (state == SecretaryState.stopping &&
-          stopPolicy != StopPolicy.finishQueue) {
-        break;
-      }
-
-      if (queue.isNotEmpty) {
-        await _doNextTask();
-      } else {
-        await Future.delayed(checkInterval);
-      }
-    }
-  }
 
   void add(
     K key,
@@ -96,6 +67,67 @@ class Secretary<K, T> {
     );
     tasks[key] = item;
     queue.add(key);
+  }
+
+  void start() {
+    if (state != SecretaryState.idle) return;
+    _setState(SecretaryState.active);
+    _loop();
+  }
+
+  Future<void> stop() async {
+    _setState(SecretaryState.stopping);
+    if (stopPolicy == StopPolicy.stopImmediately) {
+      _setState(SecretaryState.idle);
+      return;
+    }
+
+    await for (final newState in stateStream) {
+      if ([SecretaryState.idle, SecretaryState.disposed].contains(newState)) {
+        break;
+      }
+    }
+  }
+
+  Future<void> dispose() async {
+    await stop();
+    _setState(SecretaryState.disposed);
+    _streamController.close();
+    _stateStreamController.close();
+  }
+
+  void _addEvent(SecretaryEvent<K, T> event) {
+    if (state == SecretaryState.disposed) return;
+    _streamController.add(event);
+    lastEvent = event;
+  }
+
+  void _setState(SecretaryState newState) {
+    state = newState;
+    _stateStreamController.add(newState);
+  }
+
+  void _loop() async {
+    while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
+      if (state == SecretaryState.stopping) {
+        bool stop = true;
+        if ((stopPolicy == StopPolicy.finishQueue &&
+                (queue.isNotEmpty || active.isNotEmpty)) ||
+            (stopPolicy == StopPolicy.finishActive && active.isNotEmpty)) {
+          stop = false;
+        }
+        if (stop) {
+          _setState(SecretaryState.idle);
+          break;
+        }
+      }
+
+      if (queue.isNotEmpty) {
+        await _doNextTask();
+      } else {
+        await Future.delayed(checkInterval);
+      }
+    }
   }
 
   Future<void> _doNextTask() async {

@@ -11,19 +11,33 @@ void main(List<String> args) async {
     maxAttempts: 20,
     validator: (res) => res.ok ? null : res.error!,
     retryIf: (error) => error != 'invalid_name',
+    stopPolicy: StopPolicy.stopImmediately,
+    autostart: true,
   );
   secretary.resultStream.listen(printResult);
   secretary.errorStream.listen(printError);
+  secretary.stateStream.listen(printState);
+  printState(secretary.state);
   print(
     Colorize(
-            'Secretary is ready\nEnter names to get predictions of their ages:')
+            'Enter names to get predictions of their ages\nOther commands: start, stop')
         .magenta(),
   );
 
   void addName(String name) => secretary.add(name, () => getAge(name));
   void addNameMulti(String str) => str.split(', ').forEach(addName);
 
-  readLine().listen(addNameMulti);
+  void handleInput(String input) {
+    if (input == 'stop') {
+      secretary.stop();
+    } else if (input == 'start') {
+      secretary.start();
+    } else {
+      addNameMulti(input);
+    }
+  }
+
+  readLine().listen(handleInput);
 }
 
 void printResult(AgePredictionResult result) {
@@ -42,6 +56,9 @@ void printError(ErrorEvent<String, AgePredictionResult> event) {
     print(c.yellow());
   }
 }
+
+void printState(SecretaryState state) =>
+    print(Colorize('Secretary state: ${state.name}').italic().cyan());
 
 Stream<String> readLine() =>
     stdin.transform(utf8.decoder).transform(const LineSplitter());
