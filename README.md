@@ -1,2 +1,4 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+# Secretary
+## A sophisticated task manager.
+
+Secretary is a tool for managing queues of asynchronous tasks.
