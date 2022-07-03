@@ -5,6 +5,7 @@ class SecretaryTask<K, T> {
   final Task<T> task;
   final Validator<T>? validator;
   final Callback<T>? onComplete;
+  final RetryTest retryIf;
   final RetryPolicy retryPolicy;
   final Duration retryDelay;
   final int maxAttempts;
@@ -18,6 +19,7 @@ class SecretaryTask<K, T> {
     required this.task,
     this.validator,
     this.onComplete,
+    this.retryIf = RetryIf.alwaysRetry,
     required this.retryPolicy,
     this.retryDelay = Duration.zero,
     required this.maxAttempts,
@@ -29,6 +31,7 @@ class SecretaryTask<K, T> {
     Task<T>? task,
     Validator<T>? validator,
     Callback<T>? onComplete,
+    RetryTest? retryIf,
     RetryPolicy? retryPolicy,
     Duration? retryDelay,
     int? maxAttempts,
@@ -39,6 +42,7 @@ class SecretaryTask<K, T> {
         task: task ?? this.task,
         validator: validator ?? this.validator,
         onComplete: onComplete ?? this.onComplete,
+        retryIf: retryIf ?? this.retryIf,
         retryPolicy: retryPolicy ?? this.retryPolicy,
         retryDelay: retryDelay ?? this.retryDelay,
         maxAttempts: maxAttempts ?? this.maxAttempts,

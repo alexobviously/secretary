@@ -79,6 +79,7 @@ class Secretary<K, T> {
     Task<T> task, {
     Validator<T>? validator,
     Callback<T>? onComplete,
+    RetryTest? retryIf,
     RetryPolicy? retryPolicy,
     Duration? retryDelay,
     int? maxAttempts,
@@ -88,6 +89,7 @@ class Secretary<K, T> {
       task: task,
       validator: validator ?? this.validator,
       onComplete: onComplete,
+      retryIf: retryIf ?? this.retryIf,
       retryPolicy: retryPolicy ?? this.retryPolicy,
       retryDelay: retryDelay ?? this.retryDelay,
       maxAttempts: maxAttempts ?? this.maxAttempts,
@@ -137,7 +139,7 @@ class Secretary<K, T> {
   void _handleError(K key, Object error) {
     SecretaryTask<K, T> task = tasks[key]!.withError(error);
     tasks[key] = task;
-    if (task.canRetry) {
+    if (task.canRetry && task.retryIf(error)) {
       switch (task.retryPolicy) {
         case RetryPolicy.backOfQueue:
           queue.add(key);
