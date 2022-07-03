@@ -2,13 +2,32 @@ import 'dart:async';
 
 import 'package:secretary/secretary.dart';
 
+/// A task manager.
 class Secretary<K, T> {
+  /// The amount of time to wait before checking for new tasks when the queue is empty.
   final Duration checkInterval;
+
+  /// The amount of time to wait before retrying a task, if it was the last task attempted.
   final Duration retryDelay;
+
+  /// A validator function that will be called on results to determine if the
+  /// task succeeded.
+  /// It should return null if the task was considered a success, and the error otherwise.
   final Validator<T>? validator;
-  final bool Function(Object?) retryIf;
+
+  /// A test to determine if a task should be retried or not.
+  /// Takes an error as an input (the result of [validator]), and returns a bool.
+  final RetryTest retryIf;
+
+  /// Dictates what to do with a task that needs to be retried, i.e. should it
+  /// return to the back of the queue or be retried immediately?
   final RetryPolicy retryPolicy;
+
+  /// Dictates what the Secretary will wait for when `stop()` or `dispose()`
+  /// are called.
   final StopPolicy stopPolicy;
+
+  /// The maximum number of times to attempt a task before marking it as failed.
   final int maxAttempts;
 
   Secretary({
@@ -27,9 +46,9 @@ class Secretary<K, T> {
   late final _streamController =
       StreamController<SecretaryEvent<K, T>>.broadcast();
   Stream<SecretaryEvent<K, T>> get stream => _streamController.stream;
-  Stream<T> get resultStream => stream
-      .where((e) => e.isSuccess)
-      .map((e) => (e as SuccessEvent<K, T>).result);
+  Stream<SuccessEvent<K, T>> get successStream =>
+      stream.where((e) => e.isSuccess).map((e) => e as SuccessEvent<K, T>);
+  Stream<T> get resultStream => successStream.map((e) => e.result);
   Stream<ErrorEvent<K, T>> get errorStream =>
       stream.where((e) => e.isError).map((e) => e as ErrorEvent<K, T>);
 
@@ -45,36 +64,57 @@ class Secretary<K, T> {
 
   bool get hasTasks => tasks.isNotEmpty;
 
-  void add(
+  /// Adds an item to the queue.
+  /// [task] should be a function that returns a Future<T>, where T is the T
+  /// type constraint of the Secretary.
+  /// If [index] is specified, then the item will be inserted at that point in
+  /// the queue, otherwise it will be added to the end. A negative index can
+  /// also be used, e.g. -1 will add the task as the second last element.
+  ///
+  bool add(
     K key,
     Task<T> task, {
-    Validator<T>? validator,
+    int? index,
     Callback<T>? onComplete,
+    Callback<ErrorEvent<K, T>>? onError,
+    Validator<T>? validator,
     RetryTest? retryIf,
     RetryPolicy? retryPolicy,
     Duration? retryDelay,
     int? maxAttempts,
-  }) async {
+  }) {
+    if (queue.contains(key) || active.contains(key)) return false;
     final item = SecretaryTask<K, T>(
       key: key,
       task: task,
       validator: validator ?? this.validator,
       onComplete: onComplete,
+      onError: onError,
       retryIf: retryIf ?? this.retryIf,
       retryPolicy: retryPolicy ?? this.retryPolicy,
       retryDelay: retryDelay ?? this.retryDelay,
       maxAttempts: maxAttempts ?? this.maxAttempts,
     );
     tasks[key] = item;
-    queue.add(key);
+    if (index == null) {
+      queue.add(key);
+    } else {
+      if (index < 0) index = queue.length - index;
+      if (index < 0 || index >= queue.length) return false;
+      queue.insert(index, key);
+    }
+    return true;
   }
 
+  /// Starts executing tasks in the queue.
   void start() {
     if (state != SecretaryState.idle) return;
     _setState(SecretaryState.active);
     _loop();
   }
 
+  /// Stops execution. Can be started again as long as it wasn't disposed.
+  /// Depends on the `StopPolicy`.
   Future<void> stop() async {
     _setState(SecretaryState.stopping);
     if (stopPolicy == StopPolicy.stopImmediately) {
@@ -89,6 +129,8 @@ class Secretary<K, T> {
     }
   }
 
+  /// Dispose the Secretary and all resources associated with it.
+  /// Will have to wait for for execution to stop, depending on the `StopPolicy`.
   Future<void> dispose() async {
     await stop();
     _setState(SecretaryState.disposed);
@@ -164,25 +206,29 @@ class Secretary<K, T> {
         errors: task.errors,
       ));
     } else {
-      _handleError(key, error);
+      _handleError(task, error);
     }
   }
 
-  void _handleError(K key, Object error) {
-    SecretaryTask<K, T> task = tasks[key]!.withError(error);
-    tasks[key] = task;
+  void _handleError(SecretaryTask<K, T> task, Object error) {
+    task = task.withError(error);
+    tasks[task.key] = task;
     if (task.canRetry && task.retryIf(error)) {
       switch (task.retryPolicy) {
         case RetryPolicy.backOfQueue:
-          queue.add(key);
+          queue.add(task.key);
           break;
         case RetryPolicy.frontOfQueue:
-          queue.insert(0, key);
+          queue.insert(0, task.key);
           break;
       }
-      _addEvent(RetryEvent.fromTask(task));
+      final event = RetryEvent.fromTask(task);
+      task.onError?.call(event);
+      _addEvent(event);
     } else {
-      _addEvent(FailureEvent.fromTask(task));
+      final event = FailureEvent.fromTask(task);
+      task.onError?.call(event);
+      _addEvent(event);
     }
   }
 }
