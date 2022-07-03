@@ -23,6 +23,11 @@ class Secretary<K, T> {
   late final _streamController =
       StreamController<SecretaryEvent<K, T>>.broadcast();
   Stream<SecretaryEvent<K, T>> get stream => _streamController.stream;
+  Stream<T> get resultStream => stream
+      .where((e) => e.isSuccess)
+      .map((e) => (e as SuccessEvent<K, T>).result);
+  Stream<ErrorEvent<K, T>> get errorStream =>
+      stream.where((e) => e.isError).map((e) => e as ErrorEvent<K, T>);
 
   Map<K, SecretaryTask<K, T>> tasks = {};
   List<K> queue = [];
