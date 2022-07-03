@@ -1,21 +1,28 @@
+import 'dart:async';
+
 import 'package:secretary/secretary.dart';
 
 class Secretary<K, T> {
   final Duration checkInterval;
-  final ValidatorFunction<T>? validator;
+  final Validator<T>? validator;
   final RetryPolicy retryPolicy;
   final StopPolicy stopPolicy;
-  final int maxRetries = 0;
+  final int maxAttempts;
 
   Secretary({
     this.checkInterval = const Duration(milliseconds: 50),
     this.validator,
     this.retryPolicy = RetryPolicy.backOfQueue,
     this.stopPolicy = StopPolicy.finishActive,
+    this.maxAttempts = 1,
     bool autostart = true,
   }) {
     if (autostart) start();
   }
+
+  late final _streamController =
+      StreamController<SecretaryEvent<K, T>>.broadcast();
+  Stream<SecretaryEvent<K, T>> get stream => _streamController.stream;
 
   Map<K, SecretaryTask<K, T>> tasks = {};
   List<K> queue = [];
@@ -31,7 +38,9 @@ class Secretary<K, T> {
     state = SecretaryState.stopping;
   }
 
-  Future<void> dispose() async {}
+  Future<void> dispose() async {
+    _streamController.close();
+  }
 
   void _loop() async {
     while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
@@ -51,10 +60,10 @@ class Secretary<K, T> {
   void add(
     K key,
     FutureFunction<T> task, {
-    ValidatorFunction<T>? validator,
+    Validator<T>? validator,
     Callback<T>? onComplete,
     RetryPolicy? retryPolicy,
-    int? maxRetries,
+    int? maxAttempts,
   }) async {
     final item = SecretaryTask<K, T>(
       key: key,
@@ -62,7 +71,7 @@ class Secretary<K, T> {
       validator: validator ?? this.validator,
       onComplete: onComplete,
       retryPolicy: retryPolicy ?? this.retryPolicy,
-      maxRetries: maxRetries ?? this.maxRetries,
+      maxAttempts: maxAttempts ?? this.maxAttempts,
     );
     tasks[key] = item;
     queue.add(key);
@@ -82,17 +91,25 @@ class Secretary<K, T> {
     final task = tasks[key]!;
 
     T result = await task.task();
-    bool valid = true;
+    Object? error;
 
     if (task.validator != null) {
-      valid = task.validator!(result);
+      error = task.validator!(result);
     }
 
     active.remove(key);
-    if (valid) {
+    if (error == null) {
       tasks.remove(key);
       task.onComplete?.call(result);
+      _streamController.add(SuccessEvent(key: key, result: result));
     } else {
+      _handleError(key, error);
+    }
+  }
+
+  void _handleError(K key, Object error) {
+    SecretaryTask<K, T> task = tasks[key]!.withError(error);
+    if (task.canRetry) {
       switch (task.retryPolicy) {
         case RetryPolicy.backOfQueue:
           queue.add(key);
@@ -101,6 +118,9 @@ class Secretary<K, T> {
           queue.insert(0, key);
           break;
       }
+      _streamController.add(RetryEvent.fromTask(task));
+    } else {
+      _streamController.add(FailureEvent.fromTask(task));
     }
   }
 }

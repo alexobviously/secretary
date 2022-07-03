@@ -3,10 +3,14 @@ import 'package:secretary/secretary.dart';
 class SecretaryTask<K, T> {
   final K key;
   final FutureFunction<T> task;
-  final ValidatorFunction<T>? validator;
+  final Validator<T>? validator;
   final Callback<T>? onComplete;
   final RetryPolicy retryPolicy;
-  final int maxRetries;
+  final int maxAttempts;
+  final List<Object> errors;
+
+  int get attempts => errors.length;
+  bool get canRetry => attempts < maxAttempts;
 
   const SecretaryTask({
     required this.key,
@@ -14,16 +18,18 @@ class SecretaryTask<K, T> {
     this.validator,
     this.onComplete,
     required this.retryPolicy,
-    required this.maxRetries,
+    required this.maxAttempts,
+    this.errors = const [],
   });
 
-  SecretaryTask copyWith({
+  SecretaryTask<K, T> copyWith({
     K? key,
     FutureFunction<T>? task,
-    ValidatorFunction<T>? validator,
+    Validator<T>? validator,
     Callback<T>? onComplete,
     RetryPolicy? retryPolicy,
-    int? maxRetries,
+    int? maxAttempts,
+    List<Object>? errors,
   }) =>
       SecretaryTask<K, T>(
         key: key ?? this.key,
@@ -31,6 +37,10 @@ class SecretaryTask<K, T> {
         validator: validator ?? this.validator,
         onComplete: onComplete ?? this.onComplete,
         retryPolicy: retryPolicy ?? this.retryPolicy,
-        maxRetries: maxRetries ?? this.maxRetries,
+        maxAttempts: maxAttempts ?? this.maxAttempts,
+        errors: errors ?? this.errors,
       );
+
+  SecretaryTask<K, T> withError(Object error) =>
+      copyWith(errors: [...errors, error]);
 }

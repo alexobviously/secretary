@@ -1,5 +1,5 @@
 typedef FutureFunction<T> = Future<T> Function();
-typedef ValidatorFunction<T> = bool Function(T);
+typedef Validator<T> = Object? Function(T);
 typedef Callback<T> = T Function(T);
 
 enum SecretaryState {
