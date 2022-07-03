@@ -1,5 +1,3 @@
-import 'package:secretary/secretary.dart';
-
 class Result<T, E> {
   final T? object;
   final E? error;
