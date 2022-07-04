@@ -1,3 +1,8 @@
+## 0.1.2
+- More tests
+- More documentation
+- More Validator and RetryTest helpers
+
 ## 0.1.1
 - More documentation.
 - `failureStream` and `retryStream` helpers.
