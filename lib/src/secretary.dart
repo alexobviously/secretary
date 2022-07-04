@@ -13,7 +13,7 @@ class Secretary<K, T> {
   /// A validator function that will be called on results to determine if the
   /// task succeeded.
   /// It should return null if the task was considered a success, and the error otherwise.
-  final Validator<T>? validator;
+  final Validator<T> validator;
 
   /// A test to determine if a task should be retried or not.
   /// Takes an error as an input (the result of [validator]), and returns a bool.
@@ -33,7 +33,7 @@ class Secretary<K, T> {
   Secretary({
     this.checkInterval = const Duration(milliseconds: 50),
     this.retryDelay = const Duration(milliseconds: 1000),
-    this.validator,
+    this.validator = Validators.pass,
     this.retryIf = RetryIf.alwaysRetry,
     this.retryPolicy = RetryPolicy.backOfQueue,
     this.stopPolicy = StopPolicy.finishActive,

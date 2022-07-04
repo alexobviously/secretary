@@ -9,8 +9,8 @@ import 'agify.dart';
 void main(List<String> args) async {
   final secretary = Secretary<String, AgePredictionResult>(
     maxAttempts: 20,
-    validator: (res) => res.ok ? null : res.error!,
-    retryIf: (error) => error != 'invalid_name',
+    validator: Validators.resultOk,
+    retryIf: RetryIf.notSingle('invalid_name'),
     stopPolicy: StopPolicy.finishQueue,
     autostart: true,
   );

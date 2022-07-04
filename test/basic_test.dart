@@ -72,7 +72,7 @@ void main() {
         Secretary<int, String> secretary = Secretary(
           maxAttempts: 3,
           validator: Validators.matchSingle('ok'),
-          retryIf: (error) => error != 'fail',
+          retryIf: RetryIf.notSingle('fail'),
         );
         expectLater(
             secretary.stream,
@@ -96,7 +96,7 @@ void main() {
         Secretary<int, String> secretary = Secretary(
           maxAttempts: 3,
           validator: (val) => val == 'ok' ? null : val,
-          retryIf: (error) => error != 'fail',
+          retryIf: RetryIf.notSingle('fail'),
         );
         expectLater(
             secretary.stream,
