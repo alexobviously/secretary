@@ -39,3 +39,11 @@ class RetryIf {
   static bool alwaysRetry(Object? error) => true;
   static bool neverRetry(Object? error) => false;
 }
+
+class Validators {
+  static Validator<T> matchSingle<T>(T target) =>
+      (T val) => val == target ? null : val;
+
+  static Validator<T> matchMulti<T>(List<T> targets) =>
+      (T val) => targets.contains(val) ? null : val;
+}
