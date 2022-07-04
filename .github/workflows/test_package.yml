@@ -23,7 +23,7 @@ jobs:
         run: dart pub get
       
       - name: Basic Tests
-        run: dart test test/secretary_test.dart
+        run: dart test test/basic_test.dart
 
       - name: Retry Policy Tests
         run: dart test test/retry_policy_test.dart
