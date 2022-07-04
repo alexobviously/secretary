@@ -22,5 +22,8 @@ jobs:
       - name: Install dependencies
         run: dart pub get
       
-      - name: Run basic tests
+      - name: Basic Tests
         run: dart test test/secretary_test.dart
+
+      - name: Retry Policy Tests
+        run: dart test test/retry_policy_test.dart
