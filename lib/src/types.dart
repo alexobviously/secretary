@@ -15,13 +15,13 @@ enum SecretaryState {
   disposed,
 }
 
-/// Dictates what to do with a task that needs to be retried, i.e. should it
-/// return to the back of the queue or be retried immediately?
-enum RetryPolicy {
-  /// Error'd tasks will be placed at the back of the queue.
+/// Dictates what to do with a task that needs to be queued, such as a retried
+/// task, i.e. should it return to the back of the queue or be retried immediately?
+enum QueuePolicy {
+  /// Tasks will be placed at the back of the queue.
   backOfQueue,
 
-  /// Error'd tasks will be retried immediately.
+  /// Tasks will be retried immediately.
   frontOfQueue,
 }
 

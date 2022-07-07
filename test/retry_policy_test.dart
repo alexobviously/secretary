@@ -5,11 +5,11 @@ import 'helpers.dart';
 
 void main() {
   group('Retry Policies', () {
-    test('RetryPolicy.backOfQueue', () async {
+    test('QueuePolicy.backOfQueue', () async {
       Secretary<int, String> secretary = Secretary(
         validator: Validators.matchSingle('ok'),
         maxAttempts: 3,
-        retryPolicy: RetryPolicy.backOfQueue,
+        retryPolicy: QueuePolicy.backOfQueue,
       );
       int i = 0;
       List<String> values = ['bad', 'bad', 'ok'];
@@ -27,11 +27,11 @@ void main() {
       );
     });
 
-    test('RetryPolicy.frontOfQueue', () async {
+    test('QueuePolicy.frontOfQueue', () async {
       Secretary<int, String> secretary = Secretary(
         validator: Validators.matchSingle('ok'),
         maxAttempts: 3,
-        retryPolicy: RetryPolicy.frontOfQueue,
+        retryPolicy: QueuePolicy.frontOfQueue,
       );
       int i = 0;
       List<String> values = ['bad', 'bad', 'ok'];
@@ -53,7 +53,7 @@ void main() {
       Secretary<int, String> secretary = Secretary(
         validator: Validators.matchSingle('ok'),
         maxAttempts: 3,
-        retryPolicy: RetryPolicy.backOfQueue,
+        retryPolicy: QueuePolicy.backOfQueue,
       );
       int i = 0;
       int j = 0;
@@ -69,7 +69,7 @@ void main() {
       secretary.add(
         1,
         () => Future.delayed(Duration(milliseconds: 100), () => values[j++]),
-        overrides: TaskOverrides(retryPolicy: RetryPolicy.frontOfQueue),
+        overrides: TaskOverrides(retryPolicy: QueuePolicy.frontOfQueue),
       );
       secretary.add(
         2,

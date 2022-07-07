@@ -25,7 +25,7 @@ class Secretary<K, T> {
 
   /// Dictates what to do with a task that needs to be retried, i.e. should it
   /// return to the back of the queue or be retried immediately?
-  final RetryPolicy retryPolicy;
+  final QueuePolicy retryPolicy;
 
   /// Dictates what the Secretary will wait for when `stop()` or `dispose()`
   /// are called.
@@ -34,15 +34,19 @@ class Secretary<K, T> {
   /// The maximum number of times to attempt a task before marking it as failed.
   final int maxAttempts;
 
+  /// Dictates what to do with instances of a recurring task.
+  final QueuePolicy recurringQueuePolicy;
+
   Secretary({
     this.checkInterval = const Duration(milliseconds: 50),
     this.retryDelay = const Duration(milliseconds: 1000),
     this.validator = Validators.pass,
     this.recurringValidator = RecurringValidators.pass,
     this.retryIf = RetryIf.alwaysRetry,
-    this.retryPolicy = RetryPolicy.backOfQueue,
+    this.retryPolicy = QueuePolicy.backOfQueue,
     this.stopPolicy = StopPolicy.finishActive,
     this.maxAttempts = 1,
+    this.recurringQueuePolicy = QueuePolicy.backOfQueue,
     bool autostart = true,
   }) {
     if (autostart) start();
@@ -182,6 +186,7 @@ class Secretary<K, T> {
     int maxRuns = 0,
     TaskOverrides<T> overrides = const TaskOverrides.none(),
     RecurringValidator<K, T>? validator,
+    QueuePolicy? queuePolicy,
   }) {
     if (!(task != null || taskBuilder != null)) {
       throw Exception(
@@ -195,6 +200,7 @@ class Secretary<K, T> {
       maxRuns: maxRuns,
       overrides: overrides,
       validator: validator ?? recurringValidator,
+      queuePolicy: queuePolicy ?? recurringQueuePolicy,
     );
     recurringTasks[key] = recurringTask;
     Timer t = Timer(
@@ -371,10 +377,10 @@ class Secretary<K, T> {
     tasks[task.key] = task;
     if (task.canRetry && task.retryIf(error)) {
       switch (task.retryPolicy) {
-        case RetryPolicy.backOfQueue:
+        case QueuePolicy.backOfQueue:
           queue.add(task.key);
           break;
-        case RetryPolicy.frontOfQueue:
+        case QueuePolicy.frontOfQueue:
           queue.insert(0, task.key);
           break;
       }

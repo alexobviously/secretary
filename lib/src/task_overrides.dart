@@ -14,7 +14,7 @@ class TaskOverrides<T> {
 
   /// Dictates what to do with a task that needs to be retried, i.e. should it
   /// return to the back of the queue or be retried immediately?
-  final RetryPolicy? retryPolicy;
+  final QueuePolicy? retryPolicy;
 
   /// The amount of time to wait before retrying a task, if it was the last task attempted.
   final Duration? retryDelay;

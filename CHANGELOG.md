@@ -1,6 +1,7 @@
 ## 0.2.0
 - Recurring tasks.
 - `TaskOverrides` data class instead of tons of parameters in `Secretary.add()`.
+- `RetryPolicy` is now `QueuePolicy`.
 
 ## 0.1.2
 - More tests.

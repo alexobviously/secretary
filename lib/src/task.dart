@@ -7,7 +7,7 @@ class SecretaryTask<K, T> {
   final Callback<T>? onComplete;
   final Callback<ErrorEvent<K, T>>? onError;
   final RetryTest retryIf;
-  final RetryPolicy retryPolicy;
+  final QueuePolicy retryPolicy;
   final Duration retryDelay;
   final int maxAttempts;
   final List<Result<T, Object>> results;
@@ -41,7 +41,7 @@ class SecretaryTask<K, T> {
     Callback<T>? onComplete,
     Callback<ErrorEvent<K, T>>? onError,
     RetryTest? retryIf,
-    RetryPolicy? retryPolicy,
+    QueuePolicy? retryPolicy,
     Duration? retryDelay,
     int? maxAttempts,
     List<Result<T, Object>>? results,
