@@ -1,5 +1,7 @@
 import 'package:secretary/secretary.dart';
 
+/// Parameters passed to `RecurringValidator` and `TaskBuilder` functions.
+/// These represent the state of a `RecurringTask` at the time of execution.
 class ExecutionParams<K, T> {
   final int maxRuns;
   final List<SecretaryTask<K, T>> runs;

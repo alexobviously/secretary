@@ -1,7 +1,11 @@
+## 0.2.0
+- Recurring tasks.
+- `TaskOverrides` data class instead of tons of parameters in `Secretary.add()`.
+
 ## 0.1.2
-- More tests
-- More documentation
-- More Validator and RetryTest helpers
+- More tests.
+- More documentation.
+- More Validator and RetryTest helpers.
 
 ## 0.1.1
 - More documentation.

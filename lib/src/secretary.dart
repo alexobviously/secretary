@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:secretary/secretary.dart';
 
 /// A task manager.
@@ -154,6 +153,26 @@ class Secretary<K, T> {
     return true;
   }
 
+  /// Adds a recurring task.
+  ///
+  /// Either a [task] or a [taskBuilder] must be provided, but not both.
+  /// If [task] is used, then the same task will be built on every run. If more
+  /// complex functionality is required, for example, if the task for each run
+  /// should depend on how many times the task has run before, or what the previous
+  /// result was, then [taskBuilder] can be used.
+  ///
+  /// [interval] specifies an amount of time between a run finishing and the next
+  /// run being added to the queue.
+  ///
+  /// [maxRuns] is the total number of times this task will run before being
+  /// removed. If this is 0, then it will run indefinitely (or until the validator
+  /// returns false).
+  ///
+  /// [overrides] works the same as with `add()` - these will override the default
+  /// values of the `Secretary`.
+  ///
+  /// [validator] will be called after each run, to determine if the task should
+  /// be run again. It takes parameters determined by the previous run.
   bool addRecurring(
     K key, {
     Task<T>? task,
@@ -230,6 +249,17 @@ class Secretary<K, T> {
     _stateStreamController.add(newState);
   }
 
+  /// Stops a single recurring task with [key].
+  /// This won't remove runs that have already been started from the queue.
+  bool stopRecurringTask(K key) {
+    if (!recurringTasks.containsKey(key)) return false;
+    _timers[key]?.cancel();
+    recurringTasks.remove(key);
+    return true;
+  }
+
+  /// Stops all recurring tasks.
+  /// This won't remove runs that have already been started from the queue.
   List<RecurringTask<K, T>> stopAllRecurring() {
     _clearTimers();
     final tasks = [...recurringTasks.values];
