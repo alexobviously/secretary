@@ -1,6 +1,7 @@
 import 'package:secretary/secretary.dart';
 
 typedef Task<T> = Future<T> Function();
+typedef TaskBuilder<T> = Task<T> Function(ExecutionParams);
 typedef Validator<T> = Object? Function(T);
 typedef Callback<T> = void Function(T);
 typedef RetryTest = bool Function(Object?);
