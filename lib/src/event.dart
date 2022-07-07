@@ -13,6 +13,7 @@ class SecretaryEvent<K, T> {
   bool get isError => this is ErrorEvent;
   bool get isRetry => this is RetryEvent;
   bool get isFailure => this is FailureEvent;
+  bool get isFinal => isSuccess || isFailure;
 
   @override
   String toString() => 'SecretaryEvent($key)';

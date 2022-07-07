@@ -13,10 +13,11 @@ class RecurringTask<K, T> {
   bool get canRun => maxRuns == 0 || runs.length < maxRuns;
 
   /// Gets the execution params for the next run.
-  ExecutionParams get executionParams =>
+  ExecutionParams<K, T> get executionParams =>
       ExecutionParams(maxRuns: maxRuns, runs: runs);
 
-  Task<T> buildTask(ExecutionParams params) => task ?? taskBuilder!(params);
+  /// Builds the task for the next run.
+  Task<T> buildTask() => task ?? taskBuilder!(executionParams);
 
   const RecurringTask({
     required this.key,
@@ -31,7 +32,7 @@ class RecurringTask<K, T> {
           'Either a task or a taskBuilder must be provided, but not both.',
         );
 
-  RecurringTask copyWith({
+  RecurringTask<K, T> copyWith({
     K? key,
     Task<T>? task,
     TaskBuilder<T>? taskBuilder,
@@ -47,4 +48,7 @@ class RecurringTask<K, T> {
         runs: runs ?? this.runs,
         overrides: overrides ?? this.overrides,
       );
+
+  RecurringTask<K, T> withRun(SecretaryTask<K, T> run) =>
+      copyWith(runs: [...runs, run]);
 }

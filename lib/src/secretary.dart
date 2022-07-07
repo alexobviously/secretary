@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 
 import 'package:secretary/secretary.dart';
 
@@ -75,6 +76,12 @@ class Secretary<K, T> {
   /// Is there anything left to do?
   bool get hasTasks => tasks.isNotEmpty;
 
+  Map<K, RecurringTask<K, T>> recurringTasks = {};
+
+  bool get hasRecurringTasks => recurringTasks.isNotEmpty;
+
+  final Map<K, Timer> _timers = {};
+
   /// All task keys waiting to be executed.
   List<K> queue = [];
 
@@ -142,6 +149,36 @@ class Secretary<K, T> {
     return true;
   }
 
+  bool addRecurring(
+    K key, {
+    Task<T>? task,
+    TaskBuilder<T>? taskBuilder,
+    Duration interval = Duration.zero,
+    bool runImmediately = false,
+    int maxRuns = 0,
+    TaskOverrides<T> overrides = const TaskOverrides.none(),
+  }) {
+    if (!(task != null || taskBuilder != null)) {
+      throw Exception(
+          'Either a task or a taskBuilder must be provided, but not both.');
+    }
+    RecurringTask<K, T> recurringTask = RecurringTask(
+      key: key,
+      task: task,
+      taskBuilder: taskBuilder,
+      interval: interval,
+      maxRuns: maxRuns,
+      overrides: overrides,
+    );
+    recurringTasks[key] = recurringTask;
+    Timer t = Timer(
+      runImmediately ? Duration.zero : interval,
+      _buildTimerCallback(recurringTask),
+    );
+    _timers[key] = t;
+    return true;
+  }
+
   /// Starts executing tasks in the queue.
   void start() {
     if (state != SecretaryState.idle) return;
@@ -153,6 +190,7 @@ class Secretary<K, T> {
   /// Depends on the `StopPolicy`.
   Future<void> stop() async {
     _setState(SecretaryState.stopping);
+    stopAllRecurring(); // TODO: add policies for this
     if (stopPolicy == StopPolicy.stopImmediately) {
       _setState(SecretaryState.idle);
       return;
@@ -185,6 +223,20 @@ class Secretary<K, T> {
     _stateStreamController.add(newState);
   }
 
+  List<RecurringTask<K, T>> stopAllRecurring() {
+    _clearTimers();
+    final tasks = [...recurringTasks.values];
+    recurringTasks.clear();
+    return tasks;
+  }
+
+  void _clearTimers() {
+    for (Timer t in _timers.values) {
+      t.cancel();
+    }
+    _timers.clear();
+  }
+
   void _loop() async {
     while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
       if (state == SecretaryState.stopping) {
@@ -201,25 +253,54 @@ class Secretary<K, T> {
       }
 
       if (queue.isNotEmpty) {
-        await _doNextTask();
+        final task = await _doNextTask();
+        if (task != null &&
+            recurringTasks.containsKey(task.key) &&
+            task.finished) {
+          _handleRecurring(task);
+        }
       } else {
         await Future.delayed(checkInterval);
       }
     }
   }
 
-  Future<void> _doNextTask() async {
-    if (queue.isEmpty) return;
-    final key = queue.first;
-    await _doTask(key);
+  void _handleRecurring(SecretaryTask<K, T> task) {
+    RecurringTask<K, T> recurringTask = recurringTasks[task.key]!;
+    recurringTask = recurringTask.withRun(task);
+    recurringTasks[recurringTask.key] = recurringTask;
+    _timers[recurringTask.key]?.cancel(); // shouldn't be necessary but ok
+    _timers.remove(recurringTask.key);
+    if (recurringTask.canRun) {
+      Timer timer = Timer(
+        recurringTask.interval,
+        _buildTimerCallback(recurringTask),
+      );
+      _timers[recurringTask.key] = timer;
+    } else {
+      recurringTasks.remove(recurringTask.key);
+      // TODO: emit some sort of event?
+    }
   }
 
-  Future<void> _doTask(K key) async {
-    if (!queue.contains(key)) return;
+  VoidCallback _buildTimerCallback(RecurringTask<K, T> task) => () => add(
+        task.key,
+        task.buildTask(),
+        overrides: task.overrides,
+      );
+
+  Future<SecretaryTask<K, T>?> _doNextTask() async {
+    if (queue.isEmpty) return null;
+    final key = queue.first;
+    return await _doTask(key);
+  }
+
+  Future<SecretaryTask<K, T>?> _doTask(K key) async {
+    if (!queue.contains(key)) return null;
 
     queue.remove(key);
     active.add(key);
-    final task = tasks[key]!;
+    SecretaryTask<K, T> task = tasks[key]!;
 
     if (lastEvent != null && lastEvent!.isRetry && lastEvent!.key == key) {
       await Future.delayed(task.retryDelay);
@@ -235,6 +316,7 @@ class Secretary<K, T> {
     active.remove(key);
     if (error == null) {
       tasks.remove(key);
+      task = task.withSuccess(result);
       task.onComplete?.call(result);
       _addEvent(SuccessEvent(
         key: key,
@@ -242,11 +324,12 @@ class Secretary<K, T> {
         errors: task.errors,
       ));
     } else {
-      _handleError(task, error);
+      return _handleError(task, error);
     }
+    return task;
   }
 
-  void _handleError(SecretaryTask<K, T> task, Object error) {
+  SecretaryTask<K, T> _handleError(SecretaryTask<K, T> task, Object error) {
     task = task.withError(error);
     tasks[task.key] = task;
     if (task.canRetry && task.retryIf(error)) {
@@ -267,5 +350,6 @@ class Secretary<K, T> {
       task.onError?.call(event);
       _addEvent(event);
     }
+    return task;
   }
 }

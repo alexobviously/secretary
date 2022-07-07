@@ -10,10 +10,15 @@ class SecretaryTask<K, T> {
   final RetryPolicy retryPolicy;
   final Duration retryDelay;
   final int maxAttempts;
-  final List<Object> errors;
+  final List<Result<T, Object>> results;
 
-  int get attempts => errors.length;
+  List<Object> get errors =>
+      results.where((e) => !e.ok).map((e) => e.error!).toList();
+  int get attempts => results.length;
   bool get canRetry => attempts < maxAttempts;
+  bool get succeeded => results.isNotEmpty && results.last.ok;
+  bool get failed => !canRetry && !succeeded;
+  bool get finished => !canRetry || succeeded;
 
   const SecretaryTask({
     required this.key,
@@ -25,7 +30,7 @@ class SecretaryTask<K, T> {
     required this.retryPolicy,
     this.retryDelay = Duration.zero,
     required this.maxAttempts,
-    this.errors = const [],
+    this.results = const [],
   });
 
   SecretaryTask<K, T> copyWith({
@@ -38,7 +43,7 @@ class SecretaryTask<K, T> {
     RetryPolicy? retryPolicy,
     Duration? retryDelay,
     int? maxAttempts,
-    List<Object>? errors,
+    List<Result<T, Object>>? results,
   }) =>
       SecretaryTask<K, T>(
         key: key ?? this.key,
@@ -50,9 +55,14 @@ class SecretaryTask<K, T> {
         retryPolicy: retryPolicy ?? this.retryPolicy,
         retryDelay: retryDelay ?? this.retryDelay,
         maxAttempts: maxAttempts ?? this.maxAttempts,
-        errors: errors ?? this.errors,
+        results: results ?? this.results,
       );
 
+  SecretaryTask<K, T> withResult(Result<T, Object> result) =>
+      copyWith(results: [...results, result]);
+
   SecretaryTask<K, T> withError(Object error) =>
-      copyWith(errors: [...errors, error]);
+      withResult(Result.error(error));
+
+  SecretaryTask<K, T> withSuccess(T result) => withResult(Result.ok(result));
 }
