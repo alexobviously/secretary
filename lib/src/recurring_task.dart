@@ -7,6 +7,7 @@ class RecurringTask<K, T> {
   final int maxRuns;
   final List<SecretaryTask<K, T>> runs;
   final Duration interval;
+  final TaskOverrides<T> overrides;
 
   int get numRuns => runs.length;
   bool get canRun => maxRuns == 0 || runs.length < maxRuns;
@@ -15,6 +16,8 @@ class RecurringTask<K, T> {
   ExecutionParams get executionParams =>
       ExecutionParams(maxRuns: maxRuns, runs: runs);
 
+  Task<T> buildTask(ExecutionParams params) => task ?? taskBuilder!(params);
+
   const RecurringTask({
     required this.key,
     this.task,
@@ -22,6 +25,7 @@ class RecurringTask<K, T> {
     required this.maxRuns,
     this.runs = const [],
     this.interval = Duration.zero,
+    this.overrides = const TaskOverrides.none(),
   }) : assert(
           task != null || taskBuilder != null,
           'Either a task or a taskBuilder must be provided, but not both.',
@@ -33,6 +37,7 @@ class RecurringTask<K, T> {
     TaskBuilder<T>? taskBuilder,
     int? maxRuns,
     List<SecretaryTask<K, T>>? runs,
+    TaskOverrides<T>? overrides,
   }) =>
       RecurringTask(
         key: key ?? this.key,
@@ -40,5 +45,6 @@ class RecurringTask<K, T> {
         taskBuilder: taskBuilder ?? this.taskBuilder,
         maxRuns: maxRuns ?? this.maxRuns,
         runs: runs ?? this.runs,
+        overrides: overrides ?? this.overrides,
       );
 }

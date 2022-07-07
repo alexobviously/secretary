@@ -69,7 +69,7 @@ void main() {
       secretary.add(
         1,
         () => Future.delayed(Duration(milliseconds: 100), () => values[j++]),
-        retryPolicy: RetryPolicy.frontOfQueue,
+        overrides: TaskOverrides(retryPolicy: RetryPolicy.frontOfQueue),
       );
       secretary.add(
         2,

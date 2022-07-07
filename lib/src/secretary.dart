@@ -109,46 +109,27 @@ class Secretary<K, T> {
   /// for this task, respectively. These are not required; all of the events
   /// for all tasks are passed to the streams in `Secretary`.
   ///
-  /// All other parameters are optional overrides of the values the Secretary has.
-  ///
-  /// [validator] is function that will be called on results to determine if the
-  /// task succeeded.
-  /// It should return null if the task was considered a success, and the error otherwise.
-  ///
-  /// [retryIf] is a test to determine if a task should be retried or not.
-  /// Takes an error as an input (the result of [validator]), and returns a bool.
-  ///
-  /// [retryPolicy] dictates what to do with a task that needs to be retried,
-  /// i.e. should it return to the back of the queue or be retried immediately?
-  ///
-  /// [retryDelay] is the amount of time to wait before retrying a task,
-  /// if it was the last task attempted.
-  ///
-  /// [maxAttempts] is the maximum number of times to attempt a task before
-  /// marking it as failed.
+  /// Use [overrides] to override parameters of the Secretary for this task only,
+  /// such as [validator] and [maxAttempts].
   bool add(
     K key,
     Task<T> task, {
     int? index,
     Callback<T>? onComplete,
     Callback<ErrorEvent<K, T>>? onError,
-    Validator<T>? validator,
-    RetryTest? retryIf,
-    RetryPolicy? retryPolicy,
-    Duration? retryDelay,
-    int? maxAttempts,
+    TaskOverrides<T> overrides = const TaskOverrides.none(),
   }) {
     if (queue.contains(key) || active.contains(key)) return false;
     final item = SecretaryTask<K, T>(
       key: key,
       task: task,
-      validator: validator ?? this.validator,
+      validator: overrides.validator ?? validator,
       onComplete: onComplete,
       onError: onError,
-      retryIf: retryIf ?? this.retryIf,
-      retryPolicy: retryPolicy ?? this.retryPolicy,
-      retryDelay: retryDelay ?? this.retryDelay,
-      maxAttempts: maxAttempts ?? this.maxAttempts,
+      retryIf: overrides.retryIf ?? retryIf,
+      retryPolicy: overrides.retryPolicy ?? retryPolicy,
+      retryDelay: overrides.retryDelay ?? retryDelay,
+      maxAttempts: overrides.maxAttempts ?? maxAttempts,
     );
     tasks[key] = item;
     if (index == null) {
