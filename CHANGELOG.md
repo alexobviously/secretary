@@ -1,3 +1,6 @@
+## 0.2.1
+- Added `onComplete` and `onError` callbacks to recurring tasks.
+
 ## 0.2.0
 - Recurring tasks.
 - `TaskOverrides` data class instead of tons of parameters in `Secretary.add()`.

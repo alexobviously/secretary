@@ -10,6 +10,8 @@ class RecurringTask<K, T> {
   final TaskOverrides<T> overrides;
   final RecurringValidator<K, T> validator;
   final QueuePolicy queuePolicy;
+  final Callback<T>? onComplete;
+  final Callback<ErrorEvent<K, T>>? onError;
 
   int get numRuns => runs.length;
   bool get canRun =>
@@ -32,6 +34,8 @@ class RecurringTask<K, T> {
     this.overrides = const TaskOverrides.none(),
     this.validator = RecurringValidators.pass,
     this.queuePolicy = QueuePolicy.backOfQueue,
+    this.onComplete,
+    this.onError,
   }) : assert(
           task != null || taskBuilder != null,
           'Either a task or a taskBuilder must be provided, but not both.',
@@ -47,6 +51,8 @@ class RecurringTask<K, T> {
     TaskOverrides<T>? overrides,
     RecurringValidator<K, T>? validator,
     QueuePolicy? queuePolicy,
+    Callback<T>? onComplete,
+    Callback<ErrorEvent<K, T>>? onError,
   }) =>
       RecurringTask(
         key: key ?? this.key,
@@ -58,6 +64,8 @@ class RecurringTask<K, T> {
         overrides: overrides ?? this.overrides,
         validator: validator ?? this.validator,
         queuePolicy: queuePolicy ?? this.queuePolicy,
+        onComplete: onComplete ?? this.onComplete,
+        onError: onError ?? this.onError,
       );
 
   RecurringTask<K, T> withRun(SecretaryTask<K, T> run) =>

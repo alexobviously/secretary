@@ -8,6 +8,7 @@ void main(List<String> args) async {
     task: () => getTime('Europe/Lisbon'),
     interval: Duration(seconds: 5),
     runImmediately: true,
+    onComplete: (res) => print('In Lisbon it is ${res.object}'),
   );
   secretary.addRecurring(
     'Asia/Saigon',

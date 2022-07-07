@@ -187,6 +187,8 @@ class Secretary<K, T> {
     TaskOverrides<T> overrides = const TaskOverrides.none(),
     RecurringValidator<K, T>? validator,
     QueuePolicy? queuePolicy,
+    Callback<T>? onComplete,
+    Callback<ErrorEvent<K, T>>? onError,
   }) {
     if (!(task != null || taskBuilder != null)) {
       throw Exception(
@@ -201,6 +203,8 @@ class Secretary<K, T> {
       overrides: overrides,
       validator: validator ?? recurringValidator,
       queuePolicy: queuePolicy ?? recurringQueuePolicy,
+      onComplete: onComplete,
+      onError: onError,
     );
     recurringTasks[key] = recurringTask;
     Timer t = Timer(
@@ -330,6 +334,8 @@ class Secretary<K, T> {
         task.key,
         task.buildTask(),
         overrides: task.overrides,
+        onComplete: task.onComplete,
+        onError: task.onError,
       );
 
   Future<SecretaryTask<K, T>?> _doNextTask() async {
