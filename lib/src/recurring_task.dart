@@ -38,6 +38,7 @@ class RecurringTask<K, T> {
     TaskBuilder<T>? taskBuilder,
     int? maxRuns,
     List<SecretaryTask<K, T>>? runs,
+    Duration? interval,
     TaskOverrides<T>? overrides,
   }) =>
       RecurringTask(
@@ -46,6 +47,7 @@ class RecurringTask<K, T> {
         taskBuilder: taskBuilder ?? this.taskBuilder,
         maxRuns: maxRuns ?? this.maxRuns,
         runs: runs ?? this.runs,
+        interval: interval ?? this.interval,
         overrides: overrides ?? this.overrides,
       );
 

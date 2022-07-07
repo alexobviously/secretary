@@ -27,7 +27,10 @@ class AgePrediction {
 Future<AgePredictionResult> getAge(String name) async {
   try {
     final req = rc.Request(url: 'https://api.agify.io/?name=$name');
-    final resp = await rc.Client().execute(request: req);
+    final resp = await rc.Client().execute(
+      request: req,
+      throwRestExceptions: false,
+    );
     if (resp.statusCode != 200) return Result.error(resp.statusCode.toString());
     if (resp.body['age'] == null) {
       return Result.error('invalid_name');

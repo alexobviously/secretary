@@ -8,7 +8,10 @@ environment:
 
 dependencies:
   colorize: ^3.0.0
-  rest_client: ^2.1.4+4
+  rest_client:
+    git:
+      url: https://github.com/alexobviously/rest_client
+      ref: main
   secretary:
     path: ../
 

@@ -88,17 +88,19 @@ packages:
   rest_client:
     dependency: "direct main"
     description:
-      name: rest_client
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.4+4"
+      path: "."
+      ref: main
+      resolved-ref: "503ad8dbce00e7ebd510859b24c16b78a2b186d5"
+      url: "https://github.com/alexobviously/rest_client"
+    source: git
+    version: "2.1.4+5"
   secretary:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.2"
   source_span:
     dependency: transitive
     description:
