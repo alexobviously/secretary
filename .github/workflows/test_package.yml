@@ -28,5 +28,8 @@ jobs:
       - name: Retry Policy Tests
         run: dart test test/retry_policy_test.dart
 
+      - name: Stop Policy Tests
+        run: dart test test/stop_policy_test.dart
+
       - name: Recurring Task Tests
         run: dart test test/recurring_test.dart

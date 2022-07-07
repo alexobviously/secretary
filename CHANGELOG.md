@@ -1,3 +1,7 @@
+## 0.2.2
+- Added `StopPolicy.finishRecurring`.
+- Stop policy tests.
+
 ## 0.2.1
 - Added `onComplete` and `onError` callbacks to recurring tasks.
 

@@ -7,3 +7,6 @@ final successPredicate = predicate<SecretaryEvent>((e) => e.isSuccess);
 
 Matcher hasKey<K, T>(K key) =>
     predicate<SecretaryEvent<K, T>>((e) => e.key == key);
+
+Future<T> delayedValue<T>(T value, Duration delay) =>
+    Future.delayed(delay, () => value);
