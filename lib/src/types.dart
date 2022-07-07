@@ -102,3 +102,11 @@ class RecurringValidators {
           params.runs.length < n ||
           params.runs.reversed.take(n).where((e) => !e.failed).length < n;
 }
+
+/// A collection of common `TaskBuilder` generators.
+class TaskBuilders {
+  /// Builds tasks from the current run index.
+  static TaskBuilder<K, T> fromRunIndex<K, T>(
+          Future<T> Function(int i) builder) =>
+      (ExecutionParams params) => () => builder(params.runIndex);
+}
