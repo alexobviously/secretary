@@ -29,15 +29,28 @@ enum QueuePolicy {
 /// are called.
 enum StopPolicy {
   /// Immediately stops work, regardless of tasks in progress.
-  stopImmediately,
+  stopImmediately(0),
 
   /// Stops work after all currently active tasks are completed.
-  finishActive,
+  finishActive(1),
 
   /// Stops work after all tasks in the queue are completed.
   /// Note that tasks can still be added while the Secretary is in the `stopping`
   /// state, and thus this could go on indefinitely.
-  finishQueue,
+  finishQueue(2),
+
+  /// Stops work after all active, queued and recurring tasks are completed.
+  /// This could obviously go on forever, depending on the recurring tasks you
+  /// have, so only use this in very well controlled conditions.
+  finishRecurring(3);
+
+  final int value;
+  const StopPolicy(this.value);
+
+  bool operator >(StopPolicy other) => value > other.value;
+  bool operator >=(StopPolicy other) => value >= other.value;
+  bool operator <(StopPolicy other) => value < other.value;
+  bool operator <=(StopPolicy other) => value < other.value;
 }
 
 /// A collection of common `RetryTest` generators.

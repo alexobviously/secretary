@@ -226,7 +226,9 @@ class Secretary<K, T> {
   /// Depends on the `StopPolicy`.
   Future<void> stop() async {
     _setState(SecretaryState.stopping);
-    stopAllRecurring(); // TODO: add policies for this
+    if (stopPolicy < StopPolicy.finishRecurring) {
+      stopAllRecurring();
+    }
     if (stopPolicy == StopPolicy.stopImmediately) {
       _setState(SecretaryState.idle);
       return;
@@ -284,19 +286,25 @@ class Secretary<K, T> {
     _timers.clear();
   }
 
+  bool get canStop {
+    if (stopPolicy >= StopPolicy.finishActive && active.isNotEmpty) {
+      return false;
+    }
+    if (stopPolicy >= StopPolicy.finishQueue && queue.isNotEmpty) {
+      return false;
+    }
+    if (stopPolicy >= StopPolicy.finishRecurring && recurringTasks.isNotEmpty) {
+      return false;
+    }
+    return true;
+  }
+
   void _loop() async {
     while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
-      if (state == SecretaryState.stopping) {
-        bool stop = true;
-        if ((stopPolicy == StopPolicy.finishQueue &&
-                (queue.isNotEmpty || active.isNotEmpty)) ||
-            (stopPolicy == StopPolicy.finishActive && active.isNotEmpty)) {
-          stop = false;
-        }
-        if (stop) {
-          _setState(SecretaryState.idle);
-          break;
-        }
+      if (state == SecretaryState.stopping && canStop) {
+        _setState(SecretaryState.idle);
+        stopAllRecurring();
+        break;
       }
 
       if (queue.isNotEmpty) {
