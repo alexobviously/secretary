@@ -3,14 +3,16 @@ import 'package:secretary/secretary.dart';
 class RecurringTask<K, T> {
   final K key;
   final Task<T>? task;
-  final TaskBuilder<T>? taskBuilder;
+  final TaskBuilder<K, T>? taskBuilder;
   final int maxRuns;
   final List<SecretaryTask<K, T>> runs;
   final Duration interval;
   final TaskOverrides<T> overrides;
+  final RecurringValidator<K, T> validator;
 
   int get numRuns => runs.length;
-  bool get canRun => maxRuns == 0 || runs.length < maxRuns;
+  bool get canRun =>
+      (maxRuns == 0 || runs.length < maxRuns) && validator(executionParams);
 
   /// Gets the execution params for the next run.
   ExecutionParams<K, T> get executionParams =>
@@ -27,6 +29,7 @@ class RecurringTask<K, T> {
     this.runs = const [],
     this.interval = Duration.zero,
     this.overrides = const TaskOverrides.none(),
+    this.validator = RecurringValidators.pass,
   }) : assert(
           task != null || taskBuilder != null,
           'Either a task or a taskBuilder must be provided, but not both.',
@@ -35,11 +38,12 @@ class RecurringTask<K, T> {
   RecurringTask<K, T> copyWith({
     K? key,
     Task<T>? task,
-    TaskBuilder<T>? taskBuilder,
+    TaskBuilder<K, T>? taskBuilder,
     int? maxRuns,
     List<SecretaryTask<K, T>>? runs,
     Duration? interval,
     TaskOverrides<T>? overrides,
+    RecurringValidator<K, T>? validator,
   }) =>
       RecurringTask(
         key: key ?? this.key,
@@ -49,6 +53,7 @@ class RecurringTask<K, T> {
         runs: runs ?? this.runs,
         interval: interval ?? this.interval,
         overrides: overrides ?? this.overrides,
+        validator: validator ?? this.validator,
       );
 
   RecurringTask<K, T> withRun(SecretaryTask<K, T> run) =>

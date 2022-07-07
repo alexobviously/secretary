@@ -2,10 +2,11 @@ import 'package:secretary/secretary.dart';
 
 typedef VoidCallback = void Function();
 typedef Task<T> = Future<T> Function();
-typedef TaskBuilder<T> = Task<T> Function(ExecutionParams);
+typedef TaskBuilder<K, T> = Task<T> Function(ExecutionParams<K, T>);
 typedef Validator<T> = Object? Function(T);
 typedef Callback<T> = void Function(T);
 typedef RetryTest = bool Function(Object?);
+typedef RecurringValidator<K, T> = bool Function(ExecutionParams<K, T>);
 
 enum SecretaryState {
   idle,
@@ -60,4 +61,16 @@ class Validators {
       (T val) => targets.contains(val) ? null : val;
   static Object? resultOk<T, E>(Result<T, E> result) =>
       result.ok ? null : result.error!;
+}
+
+class RecurringValidators {
+  static bool pass(ExecutionParams params) => true;
+  static bool lastRunSucceeded(ExecutionParams params) =>
+      params.runs.last.succeeded;
+  static RecurringValidator maxFailures(int n) =>
+      (ExecutionParams params) => params.runs.where((e) => e.failed).length < n;
+  static RecurringValidator maxFailuresInRow(int n) =>
+      (ExecutionParams params) =>
+          params.runs.length < n ||
+          params.runs.reversed.take(n).where((e) => !e.failed).length < n;
 }

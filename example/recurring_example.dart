@@ -15,6 +15,7 @@ void main(List<String> args) async {
     interval: Duration(seconds: 3),
     maxRuns: 5,
   );
+  DateTime cutoffTime = DateTime.now().add(Duration(days: 4));
   secretary.addRecurring(
     'Brazil/East',
     taskBuilder: (params) => () => getTime(
@@ -22,6 +23,9 @@ void main(List<String> args) async {
           timeTravel: Duration(days: params.runIndex),
         ),
     interval: Duration(seconds: 5),
+    validator: (params) =>
+        params.runs.last.lastResult?.object?.object?.isBefore(cutoffTime) ??
+        false,
   );
   secretary.stream.listen(print);
 }

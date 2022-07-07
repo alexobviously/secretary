@@ -15,6 +15,11 @@ class Secretary<K, T> {
   /// It should return null if the task was considered a success, and the error otherwise.
   final Validator<T> validator;
 
+  /// A validator function that will determine if a recurring task should be
+  /// continued each run. Takes an `ExecutionParams<K, T>` object in and returns
+  /// a boolean. True means the recurring task will continue, and false stops it.
+  final RecurringValidator<K, T> recurringValidator;
+
   /// A test to determine if a task should be retried or not.
   /// Takes an error as an input (the result of [validator]), and returns a bool.
   final RetryTest retryIf;
@@ -34,6 +39,7 @@ class Secretary<K, T> {
     this.checkInterval = const Duration(milliseconds: 50),
     this.retryDelay = const Duration(milliseconds: 1000),
     this.validator = Validators.pass,
+    this.recurringValidator = RecurringValidators.pass,
     this.retryIf = RetryIf.alwaysRetry,
     this.retryPolicy = RetryPolicy.backOfQueue,
     this.stopPolicy = StopPolicy.finishActive,
@@ -151,11 +157,12 @@ class Secretary<K, T> {
   bool addRecurring(
     K key, {
     Task<T>? task,
-    TaskBuilder<T>? taskBuilder,
+    TaskBuilder<K, T>? taskBuilder,
     Duration interval = Duration.zero,
     bool runImmediately = false,
     int maxRuns = 0,
     TaskOverrides<T> overrides = const TaskOverrides.none(),
+    RecurringValidator<K, T>? validator,
   }) {
     if (!(task != null || taskBuilder != null)) {
       throw Exception(
@@ -168,6 +175,7 @@ class Secretary<K, T> {
       interval: interval,
       maxRuns: maxRuns,
       overrides: overrides,
+      validator: validator ?? recurringValidator,
     );
     recurringTasks[key] = recurringTask;
     Timer t = Timer(

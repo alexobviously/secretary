@@ -19,6 +19,7 @@ class SecretaryTask<K, T> {
   bool get succeeded => results.isNotEmpty && results.last.ok;
   bool get failed => !canRetry && !succeeded;
   bool get finished => !canRetry || succeeded;
+  Result<T, Object>? get lastResult => results.isNotEmpty ? results.last : null;
 
   const SecretaryTask({
     required this.key,
