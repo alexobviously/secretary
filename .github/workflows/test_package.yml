@@ -33,3 +33,6 @@ jobs:
 
       - name: Recurring Task Tests
         run: dart test test/recurring_test.dart
+
+      - name: Concurrency Tests
+        run: dart test test/concurrency_test.dart
