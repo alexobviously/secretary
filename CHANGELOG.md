@@ -1,3 +1,6 @@
+## 0.3.0
+- Added concurrency: `Secretary.maxConcurrentTasks`.
+
 ## 0.2.2
 - Added `StopPolicy.finishRecurring`.
 - Stop policy tests.

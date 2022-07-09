@@ -9,9 +9,13 @@ Secretary is a tool for keeping your futures in check. It's useful for managing 
 - Retry handling: limits, policies, conditions
 - Type constraints for keys and results
 - Event stream, and convenience methods for splitting it into result and error streams
+- Concurrent tasks
+- Recurring tasks
 
-## Upcoming features
-- Concurrency
+## Upcoming Features
+- Scheduled tasks (i.e. set a datetime for execution).
+- Better state tracking (stream updates with a more descriptive state of the Secretary, e.g. number of tasks running).
+- Event stream improvements, especially for incorporating recurring task events.
 
 ## Simple use case
 Imagine a situation where you want to manage the uploading of a number of files to some server, and you want to queue them so it doesn't all happen at once and kill whatever fragile networking protocol is the weakest link. You don't necessarily care about collecting any results from this process, but you do want to check if the HTTP status code was 200 (successful), and retry some number of times if it wasn't.
