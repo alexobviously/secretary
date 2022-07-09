@@ -3,6 +3,10 @@ import 'package:secretary/secretary.dart';
 
 /// A task manager.
 class Secretary<K, T> {
+  /// The number of tasks that can execute simultaneously.
+  /// To allow infinite concurrency (i.e. no queue), set this to 0.
+  final int maxConcurrentTasks;
+
   /// The amount of time to wait before checking for new tasks when the queue is empty.
   final Duration checkInterval;
 
@@ -38,6 +42,7 @@ class Secretary<K, T> {
   final QueuePolicy recurringQueuePolicy;
 
   Secretary({
+    this.maxConcurrentTasks = 1,
     this.checkInterval = const Duration(milliseconds: 50),
     this.retryDelay = const Duration(milliseconds: 1000),
     this.validator = Validators.pass,
@@ -87,6 +92,8 @@ class Secretary<K, T> {
   Map<K, RecurringTask<K, T>> recurringTasks = {};
 
   bool get hasRecurringTasks => recurringTasks.isNotEmpty;
+  bool get hasTaskCapacity =>
+      maxConcurrentTasks == 0 || active.length < maxConcurrentTasks;
 
   final Map<K, Timer> _timers = {};
 
@@ -308,11 +315,10 @@ class Secretary<K, T> {
       }
 
       if (queue.isNotEmpty) {
-        final task = await _doNextTask();
-        if (task != null &&
-            recurringTasks.containsKey(task.key) &&
-            task.finished) {
-          _handleRecurring(task);
+        Future<SecretaryTask<K, T>?> future = _doNextTask()
+          ..then(_handleRecurring);
+        if (!hasTaskCapacity) {
+          await future;
         }
       } else {
         await Future.delayed(checkInterval);
@@ -320,7 +326,9 @@ class Secretary<K, T> {
     }
   }
 
-  void _handleRecurring(SecretaryTask<K, T> task) {
+  void _handleRecurring(SecretaryTask<K, T>? task) {
+    if (task == null || !recurringTasks.containsKey(task.key)) return;
+
     RecurringTask<K, T> recurringTask = recurringTasks[task.key]!;
     recurringTask = recurringTask.withRun(task);
     recurringTasks[recurringTask.key] = recurringTask;
