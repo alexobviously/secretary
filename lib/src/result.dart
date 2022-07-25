@@ -16,6 +16,13 @@ class Result<T, E> {
   /// A failed result.
   factory Result.error(E error) => Result(error: error);
 
+  /// Transforms a Result<T, E> into a Result<X, E> through [transformer].
+  /// If the Result this is called on has an error, it will be passed on, and
+  /// if it is ok then the [transformer] will be applied.
+  Result<X, E> transform<X>(Result<X, E> Function(T e) transformer) =>
+      // ignore: null_check_on_nullable_type_parameter
+      ok ? transformer(object!) : Result<X, E>.error(error!);
+
   @override
   String toString() {
     String str = ok ? 'ok, $object' : 'error, $error';
