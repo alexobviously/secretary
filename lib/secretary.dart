@@ -1,3 +1,4 @@
+export 'src/errors.dart';
 export 'src/event.dart';
 export 'src/execution_params.dart';
 export 'src/recurring_task.dart';

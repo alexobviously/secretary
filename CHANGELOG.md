@@ -1,3 +1,6 @@
+## 0.3.1
+- `Secretary.waitForResult()`: use this to wait for a result for a specific event.
+
 ## 0.3.0
 - Added concurrency: `Secretary.maxConcurrentTasks`.
 

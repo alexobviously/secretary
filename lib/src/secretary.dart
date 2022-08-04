@@ -152,6 +152,8 @@ class Secretary<K, T> {
       retryPolicy: overrides.retryPolicy ?? retryPolicy,
       retryDelay: overrides.retryDelay ?? retryDelay,
       maxAttempts: overrides.maxAttempts ?? maxAttempts,
+      completer: Completer(),
+      finalCompleter: Completer(),
     );
     tasks[key] = item;
     if (index == null) {
@@ -246,6 +248,21 @@ class Secretary<K, T> {
         break;
       }
     }
+  }
+
+  /// Waits for a result for a task with [key].
+  /// If the task is not found, a `TaskNotFoundError` will be returned.
+  /// If [waitForFinal] is true, this function will wait for the task to be
+  /// totally completed, i.e. it won't return after an error if the task can
+  /// be retried. If false, this function will return after the next attempt.
+  Future<Result<T, Object>> waitForResult(K key,
+      {bool waitForFinal = true}) async {
+    if (tasks.containsKey(key)) {
+      return waitForFinal
+          ? tasks[key]!.finalCompleter.future
+          : tasks[key]!.completer.future;
+    }
+    return Result.error(TaskNotFoundError(key));
   }
 
   /// Dispose the Secretary and all resources associated with it.
@@ -388,6 +405,8 @@ class Secretary<K, T> {
         result: result,
         errors: task.errors,
       ));
+      task.completer.complete(Result.ok(result));
+      task.finalCompleter.complete(Result.ok(result));
     } else {
       return _handleError(task, error);
     }
@@ -396,6 +415,8 @@ class Secretary<K, T> {
 
   SecretaryTask<K, T> _handleError(SecretaryTask<K, T> task, Object error) {
     task = task.withError(error);
+    task.completer.complete(Result.error(error));
+    task = task.copyWith(completer: Completer());
     tasks[task.key] = task;
     if (task.canRetry && task.retryIf(error)) {
       switch (task.retryPolicy) {
@@ -414,6 +435,7 @@ class Secretary<K, T> {
       final event = FailureEvent.fromTask(task);
       task.onError?.call(event);
       _addEvent(event);
+      task.finalCompleter.complete(Result.error(error));
     }
     return task;
   }

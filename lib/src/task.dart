@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:secretary/secretary.dart';
 
 class SecretaryTask<K, T> {
@@ -11,6 +13,8 @@ class SecretaryTask<K, T> {
   final Duration retryDelay;
   final int maxAttempts;
   final List<Result<T, Object>> results;
+  final Completer<Result<T, Object>> completer;
+  final Completer<Result<T, Object>> finalCompleter;
 
   List<Object> get errors =>
       results.where((e) => !e.ok).map((e) => e.error!).toList();
@@ -32,6 +36,8 @@ class SecretaryTask<K, T> {
     this.retryDelay = Duration.zero,
     required this.maxAttempts,
     this.results = const [],
+    required this.completer,
+    required this.finalCompleter,
   });
 
   SecretaryTask<K, T> copyWith({
@@ -45,6 +51,8 @@ class SecretaryTask<K, T> {
     Duration? retryDelay,
     int? maxAttempts,
     List<Result<T, Object>>? results,
+    Completer<Result<T, Object>>? completer,
+    Completer<Result<T, Object>>? finalCompleter,
   }) =>
       SecretaryTask<K, T>(
         key: key ?? this.key,
@@ -57,6 +65,8 @@ class SecretaryTask<K, T> {
         retryDelay: retryDelay ?? this.retryDelay,
         maxAttempts: maxAttempts ?? this.maxAttempts,
         results: results ?? this.results,
+        completer: completer ?? this.completer,
+        finalCompleter: finalCompleter ?? this.finalCompleter,
       );
 
   SecretaryTask<K, T> withResult(Result<T, Object> result) =>
