@@ -39,7 +39,6 @@ void main() {
         () => Future.delayed(Duration(milliseconds: 200), () => values[i++]),
       );
       final result = await secretary.waitForResult(0, waitForFinal: false);
-      print(result);
       expect(result.error, InvalidValueError(-2));
     });
   });
