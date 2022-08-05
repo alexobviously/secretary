@@ -68,3 +68,22 @@ final secretary = Secretary<String, int>(
 ```
 
 In this case, tasks that result in a 415 error will be declared failures, and you'll be able to see their events in the stream and log them as above.
+
+## Waiting for results
+If you want to get the value of a specific task asynchronously, you can use `Secretary.waitForResult(key)`, for example:
+
+```dart
+Future<Result<Something, Error>> getValue(int thingId) async {
+    if(results.containsKey(thingId)) {
+        // Checking some local map of results first.
+        return results[thingId];
+    }
+    // Tell the secretary to get the thing from some service.
+    // Note that if the key is already in the task list, it won't be added again.
+    secretary.add(thingId, () => thingService.getThing(thingId));
+    final result = await secretary.waitForResult(thingId);
+    // You could add [result] to [results] here, but it's better practice to use
+    // secretary.listen when you create it instead.
+    return result;
+}
+```
