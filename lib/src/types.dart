@@ -2,11 +2,11 @@ import 'package:secretary/secretary.dart';
 
 typedef VoidCallback = void Function();
 typedef Task<T> = Future<T> Function();
-typedef TaskBuilder<K, T> = Task<T> Function(ExecutionParams<K, T>);
-typedef Validator<T> = Object? Function(T);
-typedef Callback<T> = void Function(T);
+typedef TaskBuilder<K, T> = Task<T> Function(ExecutionParams<K, T> params);
+typedef Validator<T> = Object? Function(T e);
+typedef Callback<T> = void Function(T e);
 typedef RetryTest = bool Function(Object?);
-typedef RecurringValidator<K, T> = bool Function(ExecutionParams<K, T>);
+typedef RecurringValidator<K, T> = bool Function(ExecutionParams<K, T> params);
 
 enum SecretaryState {
   idle,
@@ -85,11 +85,19 @@ class Validators {
 
   /// Valid if the result was equal to [target].
   static Validator<T> matchSingle<T>(T target) =>
-      (T val) => val == target ? null : val;
+      (T val) => val == target ? null : InvalidValueError(val);
 
   /// Valid if the result was one of [targets].
   static Validator<T> matchMulti<T>(List<T> targets) =>
-      (T val) => targets.contains(val) ? null : val;
+      (T val) => targets.contains(val) ? null : InvalidValueError(val);
+
+  /// Valid if the result was not equal to [target].
+  static Validator<T> notSingle<T>(T target) =>
+      (T val) => val != target ? null : InvalidValueError(val);
+
+  /// Valid if the result doesn't match any of [targets].
+  static Validator<T> notIn<T>(List<T> targets) =>
+      (T val) => !targets.contains(val) ? null : InvalidValueError(val);
 
   /// Valid if the result (a `Result` object) is ok.
   static Object? resultOk<T, E>(Result<T, E> result) =>

@@ -1,3 +1,7 @@
+## 0.3.2
+- Tests for `waitForResult()`.
+- More `Validator` helper functions, and match validators now return `InvalidValueError`.
+
 ## 0.3.1
 - `Secretary.waitForResult()`: use this to wait for a result for a specific event.
 
