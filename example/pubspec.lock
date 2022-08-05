@@ -42,7 +42,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.4"
+    version: "0.13.5"
   http_parser:
     dependency: transitive
     description:
@@ -63,7 +63,7 @@ packages:
       name: json_class
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.2+7"
+    version: "2.1.2+8"
   logging:
     dependency: transitive
     description:
@@ -90,10 +90,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "503ad8dbce00e7ebd510859b24c16b78a2b186d5"
+      resolved-ref: b6644c3e6a408579d9e9f6ef394b58c71c24f4b5
       url: "https://github.com/alexobviously/rest_client"
     source: git
-    version: "2.1.4+5"
+    version: "2.1.4+7"
   secretary:
     dependency: "direct main"
     description:
@@ -107,7 +107,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.1"
   string_scanner:
     dependency: transitive
     description:
