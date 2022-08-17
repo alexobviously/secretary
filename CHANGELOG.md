@@ -1,3 +1,7 @@
+## 0.4.0
+- What used to be `SecretaryState` is now `SecretaryStatus`, `Secretary.state` is now `Secretary.status`, etc.
+- Added `SecretaryState` (`Secretary.state` and `Secretary.stateStream`), which contains information about the queue and recurring tasks.
+
 ## 0.3.2
 - Tests for `waitForResult()`.
 - More `Validator` helper functions, and match validators now return `InvalidValueError`.

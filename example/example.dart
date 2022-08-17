@@ -16,8 +16,8 @@ void main(List<String> args) async {
   );
   secretary.resultStream.listen(printResult);
   secretary.errorStream.listen(printError);
-  secretary.stateStream.listen(printState);
-  printState(secretary.state);
+  secretary.statusStream.listen(printState);
+  printState(secretary.status);
   print(
     Colorize(
             'Enter names to get predictions of their ages\nOther commands: start, stop')
@@ -57,7 +57,7 @@ void printError(ErrorEvent<String, AgePredictionResult> event) {
   }
 }
 
-void printState(SecretaryState state) =>
+void printState(SecretaryStatus state) =>
     print(Colorize('Secretary state: ${state.name}').italic().cyan());
 
 Stream<String> readLine() =>

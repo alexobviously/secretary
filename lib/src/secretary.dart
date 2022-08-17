@@ -106,14 +106,33 @@ class Secretary<K, T> {
   /// The last event that was logged.
   SecretaryEvent<K, T>? lastEvent;
 
+  late final _statusStreamController =
+      StreamController<SecretaryStatus>.broadcast();
+
+  /// A stream of the Secretary's status.
+  Stream<SecretaryStatus> get statusStream => _statusStreamController.stream;
+
+  /// The current status of the Secretary.
+  SecretaryStatus status = SecretaryStatus.idle;
+
   late final _stateStreamController =
       StreamController<SecretaryState>.broadcast();
 
-  /// A stream of Secretary's state.
+  /// A stream of the Secretary's state, including the state of the queue
+  /// and recurring tasks.
   Stream<SecretaryState> get stateStream => _stateStreamController.stream;
 
-  /// The current state of the Secretary.
-  SecretaryState state = SecretaryState.idle;
+  /// The current state of the Secretary, including its state, the contents of
+  /// the queue, and recurring tasks.
+  SecretaryState<K, T> get state => SecretaryState(
+        status: status,
+        active: active.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
+        queue: queue.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
+        recurring: recurringTasks.values
+            .map((e) =>
+                RecurringTaskState.fromTask(e, recurringTaskStatus(e.key)))
+            .toList(),
+      );
 
   /// Adds an item to the queue.
   /// [key] is used to identify the task, and should conform to the K type
@@ -158,10 +177,12 @@ class Secretary<K, T> {
     tasks[key] = item;
     if (index == null) {
       queue.add(key);
+      _emitState();
     } else {
       if (index < 0) index = queue.length - index;
       if (index < 0 || index >= queue.length) return false;
       queue.insert(index, key);
+      _emitState();
     }
     return true;
   }
@@ -216,6 +237,7 @@ class Secretary<K, T> {
       onError: onError,
     );
     recurringTasks[key] = recurringTask;
+    _emitState();
     Timer t = Timer(
       runImmediately ? Duration.zero : interval,
       _buildTimerCallback(recurringTask),
@@ -224,27 +246,41 @@ class Secretary<K, T> {
     return true;
   }
 
+  /// Gets the status of a recurring task with [key].
+  RecurringTaskStatus recurringTaskStatus(K key) {
+    if (!recurringTasks.containsKey(key)) {
+      return RecurringTaskStatus.none;
+    }
+    if (active.contains(key)) {
+      return RecurringTaskStatus.active;
+    }
+    if (queue.contains(key)) {
+      return RecurringTaskStatus.queued;
+    }
+    return RecurringTaskStatus.waiting;
+  }
+
   /// Starts executing tasks in the queue.
   void start() {
-    if (state != SecretaryState.idle) return;
-    _setState(SecretaryState.active);
+    if (status != SecretaryStatus.idle) return;
+    _setStatus(SecretaryStatus.active);
     _loop();
   }
 
   /// Stops execution. Can be started again as long as it wasn't disposed.
   /// Depends on the `StopPolicy`.
   Future<void> stop() async {
-    _setState(SecretaryState.stopping);
+    _setStatus(SecretaryStatus.stopping);
     if (stopPolicy < StopPolicy.finishRecurring) {
       stopAllRecurring();
     }
     if (stopPolicy == StopPolicy.stopImmediately) {
-      _setState(SecretaryState.idle);
+      _setStatus(SecretaryStatus.idle);
       return;
     }
 
-    await for (final newState in stateStream) {
-      if ([SecretaryState.idle, SecretaryState.disposed].contains(newState)) {
+    await for (final newState in statusStream) {
+      if ([SecretaryStatus.idle, SecretaryStatus.disposed].contains(newState)) {
         break;
       }
     }
@@ -269,20 +305,21 @@ class Secretary<K, T> {
   /// Will have to wait for for execution to stop, depending on the `StopPolicy`.
   Future<void> dispose() async {
     await stop();
-    _setState(SecretaryState.disposed);
+    _setStatus(SecretaryStatus.disposed);
     _streamController.close();
-    _stateStreamController.close();
+    _statusStreamController.close();
   }
 
   void _addEvent(SecretaryEvent<K, T> event) {
-    if (state == SecretaryState.disposed) return;
+    if (status == SecretaryStatus.disposed) return;
     _streamController.add(event);
     lastEvent = event;
   }
 
-  void _setState(SecretaryState newState) {
-    state = newState;
-    _stateStreamController.add(newState);
+  void _setStatus(SecretaryStatus newStatus) {
+    status = newStatus;
+    _statusStreamController.add(newStatus);
+    _emitState();
   }
 
   /// Stops a single recurring task with [key].
@@ -291,6 +328,7 @@ class Secretary<K, T> {
     if (!recurringTasks.containsKey(key)) return false;
     _timers[key]?.cancel();
     recurringTasks.remove(key);
+    _emitState();
     return true;
   }
 
@@ -300,6 +338,7 @@ class Secretary<K, T> {
     _clearTimers();
     final tasks = [...recurringTasks.values];
     recurringTasks.clear();
+    _emitState();
     return tasks;
   }
 
@@ -324,9 +363,10 @@ class Secretary<K, T> {
   }
 
   void _loop() async {
-    while ([SecretaryState.active, SecretaryState.stopping].contains(state)) {
-      if (state == SecretaryState.stopping && canStop) {
-        _setState(SecretaryState.idle);
+    while (
+        [SecretaryStatus.active, SecretaryStatus.stopping].contains(status)) {
+      if (status == SecretaryStatus.stopping && canStop) {
+        _setStatus(SecretaryStatus.idle);
         stopAllRecurring();
         break;
       }
@@ -351,6 +391,9 @@ class Secretary<K, T> {
     recurringTasks[recurringTask.key] = recurringTask;
     _timers[recurringTask.key]?.cancel(); // shouldn't be necessary but ok
     _timers.remove(recurringTask.key);
+    if (recurringTask.interval != Duration.zero) {
+      _emitState();
+    }
     if (recurringTask.canRun) {
       Timer timer = Timer(
         recurringTask.interval,
@@ -360,6 +403,7 @@ class Secretary<K, T> {
     } else {
       recurringTasks.remove(recurringTask.key);
       // TODO: emit some sort of event?
+      _emitState();
     }
   }
 
@@ -384,6 +428,10 @@ class Secretary<K, T> {
     active.add(key);
     SecretaryTask<K, T> task = tasks[key]!;
 
+    if (task.retryDelay != Duration.zero) {
+      _emitState();
+    }
+
     if (lastEvent != null && lastEvent!.isRetry && lastEvent!.key == key) {
       await Future.delayed(task.retryDelay);
     }
@@ -407,6 +455,7 @@ class Secretary<K, T> {
       ));
       task.completer.complete(Result.ok(result));
       task.finalCompleter.complete(Result.ok(result));
+      _emitState();
     } else {
       return _handleError(task, error);
     }
@@ -437,6 +486,9 @@ class Secretary<K, T> {
       _addEvent(event);
       task.finalCompleter.complete(Result.error(error));
     }
+    _emitState();
     return task;
   }
+
+  void _emitState() => _stateStreamController.add(state);
 }

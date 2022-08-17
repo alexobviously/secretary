@@ -8,7 +8,7 @@ typedef Callback<T> = void Function(T e);
 typedef RetryTest = bool Function(Object?);
 typedef RecurringValidator<K, T> = bool Function(ExecutionParams<K, T> params);
 
-enum SecretaryState {
+enum SecretaryStatus {
   idle,
   active,
   stopping,
