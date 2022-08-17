@@ -16,6 +16,17 @@ class SecretaryState<K, T> {
     this.queue = const [],
     this.recurring = const [],
   });
+
+  @override
+  String toString() {
+    String activeStr =
+        'active: ${active.length} ${activeKeys.take(3)}${active.length > 3 ? '...' : ''}';
+    String queueStr =
+        'queue: ${queue.length} ${queueKeys.take(3)}${queue.length > 3 ? '...' : ''}';
+    String recurringStr =
+        'recurring: ${recurring.length} ${recurringKeys.take(3)}${recurring.length > 3 ? '...' : ''}';
+    return 'SecretaryState(status: ${status.name}, $activeStr, $queueStr, $recurringStr)';
+  }
 }
 
 class TaskState<K, T> {
