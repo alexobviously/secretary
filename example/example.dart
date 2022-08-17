@@ -17,7 +17,7 @@ void main(List<String> args) async {
   secretary.resultStream.listen(printResult);
   secretary.errorStream.listen(printError);
   secretary.statusStream.listen(printStatus);
-  // secretary.stateStream.listen(printState); // uncomment for more detail on state
+  // secretary.stateStream.listen(printState); // uncomment for more detail on state in log
   printStatus(secretary.status);
   print(
     Colorize(
