@@ -116,11 +116,11 @@ class Secretary<K, T> {
   SecretaryStatus status = SecretaryStatus.idle;
 
   late final _stateStreamController =
-      StreamController<SecretaryState>.broadcast();
+      StreamController<SecretaryState<K,T>>.broadcast();
 
   /// A stream of the Secretary's state, including the state of the queue
   /// and recurring tasks.
-  Stream<SecretaryState> get stateStream => _stateStreamController.stream;
+  Stream<SecretaryState<K,T>> get stateStream => _stateStreamController.stream;
 
   /// The current state of the Secretary, including its state, the contents of
   /// the queue, and recurring tasks.
