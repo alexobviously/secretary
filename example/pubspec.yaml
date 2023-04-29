@@ -12,6 +12,7 @@ dependencies:
     git:
       url: https://github.com/alexobviously/rest_client
       ref: main
+  rxdart: ^0.27.7
   secretary:
     path: ../
 
