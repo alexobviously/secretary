@@ -22,17 +22,5 @@ jobs:
       - name: Install dependencies
         run: dart pub get
       
-      - name: Basic Tests
-        run: dart test test/basic_test.dart
-
-      - name: Retry Policy Tests
-        run: dart test test/retry_policy_test.dart
-
-      - name: Stop Policy Tests
-        run: dart test test/stop_policy_test.dart
-
-      - name: Recurring Task Tests
-        run: dart test test/recurring_test.dart
-
-      - name: Concurrency Tests
-        run: dart test test/concurrency_test.dart
+      - name: Run Tests
+        run: dart test test
