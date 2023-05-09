@@ -19,9 +19,11 @@ void main(List<String> args) async {
     validator: Validators.resultOk,
   );
 
-  // chain the two secretaries
-  uploadSec.resultStream
-      .listen((e) => createSec.add(e.object!.id, () => createDoc(e.object!)));
+  // link the two secretaries
+  uploadSec.link(createSec, (e) => createDoc(e.object!));
+  // alternatively:
+  // uploadSec.resultStream
+  //     .listen((e) => createSec.add(e.object!.id, () => createDoc(e.object!)));
 
   // feedback
   uploadSec.resultStream.listen((e) => print('Uploaded file: ${e.object!.id}'));

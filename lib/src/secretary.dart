@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:secretary/secretary.dart';
+import 'package:secretary/src/link_data.dart';
 
 /// A task manager.
 class Secretary<K, T> {
@@ -116,11 +117,11 @@ class Secretary<K, T> {
   SecretaryStatus status = SecretaryStatus.idle;
 
   late final _stateStreamController =
-      StreamController<SecretaryState<K,T>>.broadcast();
+      StreamController<SecretaryState<K, T>>.broadcast();
 
   /// A stream of the Secretary's state, including the state of the queue
   /// and recurring tasks.
-  Stream<SecretaryState<K,T>> get stateStream => _stateStreamController.stream;
+  Stream<SecretaryState<K, T>> get stateStream => _stateStreamController.stream;
 
   /// The current state of the Secretary, including its state, the contents of
   /// the queue, and recurring tasks.
@@ -133,6 +134,9 @@ class Secretary<K, T> {
                 RecurringTaskState.fromTask(e, recurringTaskStatus(e.key)))
             .toList(),
       );
+
+  /// Records of the links this Secretary has, so they can be cleaned up.
+  final List<LinkData> _links = [];
 
   /// Adds an item to the queue.
   /// [key] is used to identify the task, and should conform to the K type
@@ -308,6 +312,10 @@ class Secretary<K, T> {
     _setStatus(SecretaryStatus.disposed);
     _streamController.close();
     _statusStreamController.close();
+    for (final l in _links) {
+      l.dispose();
+    }
+    _links.clear();
   }
 
   void _addEvent(SecretaryEvent<K, T> event) {
@@ -359,6 +367,36 @@ class Secretary<K, T> {
     if (stopPolicy >= StopPolicy.finishRecurring && recurringTasks.isNotEmpty) {
       return false;
     }
+    return true;
+  }
+
+  /// Links the Secretary to another Secretary, [target].
+  /// Whenever a task is completed by this Secretary, a task will be added to
+  /// [target] using [taskBuilder].
+  /// If a one-to-many relationship is needed, [additionalTasks] can be used.
+  void link<X>(
+    Secretary<K, X> target,
+    Future<X> Function(T result) taskBuilder, {
+    List<Future<X> Function(T result)>? additionalTasks,
+  }) {
+    if (status == SecretaryStatus.disposed) return;
+    final sub = successStream
+        .listen((e) => target.add(e.key, () => taskBuilder(e.result)));
+    final dsub = target.statusStream.listen((e) {
+      if (e == SecretaryStatus.disposed) unlink(target);
+    });
+    _links.add(LinkData(target: target, outgoingSub: sub, disposeSub: dsub));
+  }
+
+  /// Unlinks this Secretary from [target].
+  /// Note that if there are multiple distinct links, this will remove
+  /// all of them.
+  bool unlink(Secretary target) {
+    if (status == SecretaryStatus.disposed) return false;
+    final link = _links.firstWhereOrNull((l) => l.target == target);
+    if (link == null) return false;
+    link.dispose();
+    _links.remove(link);
     return true;
   }
 

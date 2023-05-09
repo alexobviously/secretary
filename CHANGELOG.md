@@ -1,3 +1,6 @@
+## 0.4.1
+- `Secretary.link()`: connects a Secretary to another, so that whenever a task successfully completes in the first, one is added to the second.
+
 ## 0.4.0
 - What used to be `SecretaryState` is now `SecretaryStatus`, `Secretary.state` is now `Secretary.status`, etc.
 - Added `SecretaryState` (`Secretary.state` and `Secretary.stateStream`), which contains information about the queue and recurring tasks.

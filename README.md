@@ -4,13 +4,14 @@
 Secretary is a tool for keeping your futures in check. It's useful for managing queues of asynchronous tasks, where not all tasks should be executed simultaneously, or where some tasks might fail. 
 
 ## Features
-- Reliable task queue
-- Result validation
-- Retry handling: limits, policies, conditions
-- Type constraints for keys and results
-- Event stream, and convenience methods for splitting it into result and error streams
-- Concurrent tasks
-- Recurring tasks
+- Reliable task queue.
+- Result validation.
+- Retry handling: limits, policies, conditions.
+- Type constraints for keys and results.
+- Event stream, and convenience methods for splitting it into result and error streams.
+- Concurrent tasks.
+- Recurring tasks.
+- Easy linking of two or more Secretaries together, so tasks finishing on one can trigger tasks on another.
 
 ## Upcoming Features
 - Scheduled tasks (i.e. set a datetime for execution).
@@ -87,3 +88,17 @@ Future<Result<Something, Error>> getValue(int thingId) async {
     return result;
 }
 ```
+
+## Linking
+Linking solves the problem of related dependent tasks that should happen in series across multiple Secretaries. For example, one task might be to upload a file (Secretary A), and another might be to update a database record with the URL of the uploaded file (Secretary B). The second task obviously depends on the first.
+
+This sort of behaviour can be accomplished with the `link` function:
+```dart
+final secA = Secretary<String, Foo>();
+final secB = Secretary<String, Bar>();
+secA.link(secB, (Foo e) => barFromFoo(e));
+// This will add a task to secB, to create a Bar object from a Foo object,
+// where the Foo object is the successful result of a task in secA.
+```
+
+See [this example](https://github.com/alexobviously/secretary/blob/main/example/links.dart) for more details.
