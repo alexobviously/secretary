@@ -9,6 +9,7 @@ class SecretaryState<K, T> {
   List<K> get activeKeys => active.map((e) => e.key).toList();
   List<K> get queueKeys => queue.map((e) => e.key).toList();
   List<K> get recurringKeys => recurring.map((e) => e.key).toList();
+  int get numTasks => active.length + queue.length + recurring.length;
 
   const SecretaryState({
     required this.status,

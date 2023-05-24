@@ -305,6 +305,20 @@ class Secretary<K, T> {
     return Result.error(TaskNotFoundError(key));
   }
 
+  /// Waits for all tasks to finish.
+  /// Useful in cases where a fixed number of tasks are added in the beginning,
+  /// and you just want to wait for all of them to complete.
+  Future<void> waitForEmpty({bool includeRecurring = false}) async {
+    final stream = stateStream.map((e) =>
+        e.active.length +
+        e.queue.length +
+        (includeRecurring ? e.recurring.length : 0));
+    await for (final numTasks in stream) {
+      if (numTasks == 0) break;
+    }
+    return;
+  }
+
   /// Dispose the Secretary and all resources associated with it.
   /// Will have to wait for for execution to stop, depending on the `StopPolicy`.
   Future<void> dispose() async {

@@ -41,5 +41,18 @@ void main() {
       final result = await secretary.waitForResult(0, waitForFinal: false);
       expect(result.error, InvalidValueError(-2));
     });
+
+    test('Wait for empty', () async {
+      Secretary<int, int> secretary = Secretary();
+      for (int i in List.generate(3, (i) => i)) {
+        secretary.add(
+          i,
+          () => Future.delayed(Duration(milliseconds: 200), () => i),
+        );
+      }
+      expect(secretary.state.numTasks, 3);
+      await secretary.waitForEmpty();
+      expect(secretary.state.numTasks, 0);
+    });
   });
 }
