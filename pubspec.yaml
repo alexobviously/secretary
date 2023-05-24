@@ -4,7 +4,7 @@ version: 0.4.1
 repository: https://github.com/alexobviously/secretary
 
 environment:
-  sdk: '>=2.17.1 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dev_dependencies:
   lints: ^2.0.0
