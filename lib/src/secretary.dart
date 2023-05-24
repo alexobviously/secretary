@@ -407,7 +407,7 @@ class Secretary<K, T> {
   /// all of them.
   bool unlink(Secretary target) {
     if (status == SecretaryStatus.disposed) return false;
-    final link = _links.firstWhereOrNull((l) => l.target == target);
+    final link = _links.where((l) => l.target == target).firstOrNull;
     if (link == null) return false;
     link.dispose();
     _links.remove(link);

@@ -1,6 +1,8 @@
 import 'package:secretary/secretary.dart';
 import 'time_api.dart';
 
+// See: https://github.com/alexobviously/secretary/issues/3
+
 void main(List<String> args) async {
   final secretary = Secretary<String, TimeResult>();
   secretary.addRecurring(
