@@ -53,6 +53,7 @@ void main() {
         successPredicate,
         successPredicate,
         failurePredicate,
+        recurringFinishedPredicate,
       ]);
     });
   });

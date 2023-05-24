@@ -80,3 +80,16 @@ class FailureEvent<K, T> extends ErrorEvent<K, T> {
   @override
   String toString() => 'FailureEvent($key, $attempts/$attempts, $error)';
 }
+
+class RecurringTaskFinishedEvent<K, T> extends SecretaryEvent<K, T> {
+  final bool invalidated;
+
+  const RecurringTaskFinishedEvent({
+    required super.key,
+    required super.errors,
+    this.invalidated = false,
+  });
+
+  @override
+  String toString() => 'RecurringTaskFinishedEvent($key, $invalidated)';
+}

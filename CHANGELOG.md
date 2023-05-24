@@ -1,6 +1,8 @@
 ## 1.0.0
-- Upgraded SDK constraint to Dart 3.
 - `Secretary.waitForEmpty()`: wait for the task list to be empty. Useful for cases where a fixed number of tasks is added at once, and you just want to wait for all of them to finish.
+- Recurring tasks now emit a `RecurringTaskFinishedEvent` when they finish.
+- Upgraded SDK constraint to Dart 3.
+- Removed `firstWhereOrNull` extension in favour of Dart 3 `firstOrNull`.
 
 ## 0.4.1
 - `Secretary.link()`: connects a Secretary to another, so that whenever a task successfully completes in the first, one is added to the second.

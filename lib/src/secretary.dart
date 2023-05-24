@@ -454,7 +454,11 @@ class Secretary<K, T> {
       _timers[recurringTask.key] = timer;
     } else {
       recurringTasks.remove(recurringTask.key);
-      // TODO: emit some sort of event?
+      _addEvent(RecurringTaskFinishedEvent(
+        key: recurringTask.key,
+        errors: recurringTask.errors,
+        invalidated: !recurringTask.valid,
+      ));
       _emitState();
     }
   }

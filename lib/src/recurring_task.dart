@@ -16,6 +16,8 @@ class RecurringTask<K, T> {
   int get numRuns => runs.length;
   bool get canRun =>
       (maxRuns == 0 || runs.length < maxRuns) && validator(executionParams);
+  bool get valid => validator(executionParams);
+  List<Object> get errors => runs.expand((e) => e.errors).toList();
 
   /// Gets the execution params for the next run.
   ExecutionParams<K, T> get executionParams =>
