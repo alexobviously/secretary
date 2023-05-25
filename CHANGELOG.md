@@ -1,3 +1,6 @@
+## 1.0.1
+- Added `initialCheck` parameter to `waitForEmpty()`, which causes the function to return immediately if the queue is already empty.
+
 ## 1.0.0
 - `Secretary.waitForEmpty()`: wait for the task list to be empty. Useful for cases where a fixed number of tasks is added at once, and you just want to wait for all of them to finish.
 - Recurring tasks now emit a `RecurringTaskFinishedEvent` when they finish.

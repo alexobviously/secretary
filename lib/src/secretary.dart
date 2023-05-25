@@ -308,7 +308,20 @@ class Secretary<K, T> {
   /// Waits for all tasks to finish.
   /// Useful in cases where a fixed number of tasks are added in the beginning,
   /// and you just want to wait for all of them to complete.
-  Future<void> waitForEmpty({bool includeRecurring = false}) async {
+  ///
+  /// If [initialCheck] is true, this function will return immediately if the
+  /// queue is empty when it is called. Defaults to false.
+  Future<void> waitForEmpty({
+    bool includeRecurring = false,
+    bool initialCheck = false,
+  }) async {
+    if (initialCheck &&
+        state.active.isEmpty &&
+        state.queue.isEmpty &&
+        (!includeRecurring || state.recurring.isEmpty)) {
+      return;
+    }
+
     final stream = stateStream.map((e) =>
         e.active.length +
         e.queue.length +
