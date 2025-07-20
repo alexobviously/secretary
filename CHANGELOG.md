@@ -1,3 +1,7 @@
+## 1.1.0
+- Increased Dart lower constraint to 3.8.0.
+- Added `Secretary.clearQueue()`.
+
 ## 1.0.1
 - Added `initialCheck` parameter to `waitForEmpty()`, which causes the function to return immediately if the queue is already empty.
 
