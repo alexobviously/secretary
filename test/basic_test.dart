@@ -29,12 +29,13 @@ void main() {
           validator: Validators.matchSingle('ok'),
         );
         expectLater(
-            secretary.errorStream,
-            emitsInOrder([
-              retryPredicate,
-              retryPredicate,
-              failurePredicate,
-            ]));
+          secretary.errorStream,
+          emitsInOrder([
+            retryPredicate,
+            retryPredicate,
+            failurePredicate,
+          ]),
+        );
         secretary.add(
           0,
           () => Future.delayed(Duration(milliseconds: 100), () => 'bad'),
@@ -51,12 +52,13 @@ void main() {
           validator: Validators.matchSingle('ok'),
         );
         expectLater(
-            secretary.stream,
-            emitsInOrder([
-              retryPredicate,
-              retryPredicate,
-              successPredicate,
-            ]));
+          secretary.stream,
+          emitsInOrder([
+            retryPredicate,
+            retryPredicate,
+            successPredicate,
+          ]),
+        );
         int i = 0;
         secretary.add(
           0,
@@ -75,12 +77,13 @@ void main() {
           retryIf: RetryIf.notSingle('fail'),
         );
         expectLater(
-            secretary.stream,
-            emitsInOrder([
-              retryPredicate,
-              retryPredicate,
-              successPredicate,
-            ]));
+          secretary.stream,
+          emitsInOrder([
+            retryPredicate,
+            retryPredicate,
+            successPredicate,
+          ]),
+        );
         int i = 0;
         secretary.add(
           0,
@@ -99,11 +102,12 @@ void main() {
           retryIf: RetryIf.notSingle('fail'),
         );
         expectLater(
-            secretary.stream,
-            emitsInOrder([
-              retryPredicate,
-              failurePredicate,
-            ]));
+          secretary.stream,
+          emitsInOrder([
+            retryPredicate,
+            failurePredicate,
+          ]),
+        );
         int i = 0;
         secretary.add(
           0,

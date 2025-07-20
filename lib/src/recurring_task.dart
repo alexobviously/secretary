@@ -39,9 +39,9 @@ class RecurringTask<K, T> {
     this.onComplete,
     this.onError,
   }) : assert(
-          task != null || taskBuilder != null,
-          'Either a task or a taskBuilder must be provided, but not both.',
-        );
+         task != null || taskBuilder != null,
+         'Either a task or a taskBuilder must be provided, but not both.',
+       );
 
   RecurringTask<K, T> copyWith({
     K? key,
@@ -55,20 +55,19 @@ class RecurringTask<K, T> {
     QueuePolicy? queuePolicy,
     Callback<T>? onComplete,
     Callback<ErrorEvent<K, T>>? onError,
-  }) =>
-      RecurringTask(
-        key: key ?? this.key,
-        task: task ?? this.task,
-        taskBuilder: taskBuilder ?? this.taskBuilder,
-        maxRuns: maxRuns ?? this.maxRuns,
-        runs: runs ?? this.runs,
-        interval: interval ?? this.interval,
-        overrides: overrides ?? this.overrides,
-        validator: validator ?? this.validator,
-        queuePolicy: queuePolicy ?? this.queuePolicy,
-        onComplete: onComplete ?? this.onComplete,
-        onError: onError ?? this.onError,
-      );
+  }) => RecurringTask(
+    key: key ?? this.key,
+    task: task ?? this.task,
+    taskBuilder: taskBuilder ?? this.taskBuilder,
+    maxRuns: maxRuns ?? this.maxRuns,
+    runs: runs ?? this.runs,
+    interval: interval ?? this.interval,
+    overrides: overrides ?? this.overrides,
+    validator: validator ?? this.validator,
+    queuePolicy: queuePolicy ?? this.queuePolicy,
+    onComplete: onComplete ?? this.onComplete,
+    onError: onError ?? this.onError,
+  );
 
   RecurringTask<K, T> withRun(SecretaryTask<K, T> run) =>
       copyWith(runs: [...runs, run]);

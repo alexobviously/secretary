@@ -126,14 +126,13 @@ class Secretary<K, T> {
   /// The current state of the Secretary, including its state, the contents of
   /// the queue, and recurring tasks.
   SecretaryState<K, T> get state => SecretaryState(
-        status: status,
-        active: active.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
-        queue: queue.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
-        recurring: recurringTasks.values
-            .map((e) =>
-                RecurringTaskState.fromTask(e, recurringTaskStatus(e.key)))
-            .toList(),
-      );
+    status: status,
+    active: active.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
+    queue: queue.map((e) => TaskState.fromTask(tasks[e]!)).toList(),
+    recurring: recurringTasks.values
+        .map((e) => RecurringTaskState.fromTask(e, recurringTaskStatus(e.key)))
+        .toList(),
+  );
 
   /// Records of the links this Secretary has, so they can be cleaned up.
   final List<LinkData> _links = [];
@@ -143,7 +142,7 @@ class Secretary<K, T> {
   /// constraint of the Secretary. It isn't really important what the [key] is,
   /// but note that tasks with keys that already exist in the queue will be rejected.
   ///
-  /// [task] should be a function that returns a Future<T>, where T is the T
+  /// [task] should be a function that returns a `Future<T>`, where T is the T
   /// type constraint of the Secretary.
   ///
   /// If [index] is specified, then the item will be inserted at that point in
@@ -226,7 +225,8 @@ class Secretary<K, T> {
   }) {
     if (!(task != null || taskBuilder != null)) {
       throw Exception(
-          'Either a task or a taskBuilder must be provided, but not both.');
+        'Either a task or a taskBuilder must be provided, but not both.',
+      );
     }
     RecurringTask<K, T> recurringTask = RecurringTask(
       key: key,
@@ -295,8 +295,10 @@ class Secretary<K, T> {
   /// If [waitForFinal] is true, this function will wait for the task to be
   /// totally completed, i.e. it won't return after an error if the task can
   /// be retried. If false, this function will return after the next attempt.
-  Future<Result<T, Object>> waitForResult(K key,
-      {bool waitForFinal = true}) async {
+  Future<Result<T, Object>> waitForResult(
+    K key, {
+    bool waitForFinal = true,
+  }) async {
     if (tasks.containsKey(key)) {
       return waitForFinal
           ? tasks[key]!.finalCompleter.future
@@ -322,10 +324,12 @@ class Secretary<K, T> {
       return;
     }
 
-    final stream = stateStream.map((e) =>
-        e.active.length +
-        e.queue.length +
-        (includeRecurring ? e.recurring.length : 0));
+    final stream = stateStream.map(
+      (e) =>
+          e.active.length +
+          e.queue.length +
+          (includeRecurring ? e.recurring.length : 0),
+    );
     await for (final numTasks in stream) {
       if (numTasks == 0) break;
     }
@@ -377,6 +381,20 @@ class Secretary<K, T> {
     return tasks;
   }
 
+  /// Clears all tasks from the queue.
+  /// This will remove tasks that are waiting to be executed, but won't affect
+  /// tasks that are currently being executed (active tasks).
+  /// Returns a list of keys of the tasks that were removed from the queue.
+  List<K> clearQueue() {
+    final removedKeys = [...queue];
+    for (final key in queue) {
+      tasks.remove(key);
+    }
+    queue.clear();
+    _emitState();
+    return removedKeys;
+  }
+
   void _clearTimers() {
     for (Timer t in _timers.values) {
       t.cancel();
@@ -407,8 +425,9 @@ class Secretary<K, T> {
     List<Future<X> Function(T result)>? additionalTasks,
   }) {
     if (status == SecretaryStatus.disposed) return;
-    final sub = successStream
-        .listen((e) => target.add(e.key, () => taskBuilder(e.result)));
+    final sub = successStream.listen(
+      (e) => target.add(e.key, () => taskBuilder(e.result)),
+    );
     final dsub = target.statusStream.listen((e) {
       if (e == SecretaryStatus.disposed) unlink(target);
     });
@@ -428,8 +447,10 @@ class Secretary<K, T> {
   }
 
   void _loop() async {
-    while (
-        [SecretaryStatus.active, SecretaryStatus.stopping].contains(status)) {
+    while ([
+      SecretaryStatus.active,
+      SecretaryStatus.stopping,
+    ].contains(status)) {
       if (status == SecretaryStatus.stopping && canStop) {
         _setStatus(SecretaryStatus.idle);
         stopAllRecurring();
@@ -467,16 +488,19 @@ class Secretary<K, T> {
       _timers[recurringTask.key] = timer;
     } else {
       recurringTasks.remove(recurringTask.key);
-      _addEvent(RecurringTaskFinishedEvent(
-        key: recurringTask.key,
-        errors: recurringTask.errors,
-        invalidated: !recurringTask.valid,
-      ));
+      _addEvent(
+        RecurringTaskFinishedEvent(
+          key: recurringTask.key,
+          errors: recurringTask.errors,
+          invalidated: !recurringTask.valid,
+        ),
+      );
       _emitState();
     }
   }
 
-  VoidCallback _buildTimerCallback(RecurringTask<K, T> task) => () => add(
+  VoidCallback _buildTimerCallback(RecurringTask<K, T> task) =>
+      () => add(
         task.key,
         task.buildTask(),
         overrides: task.overrides,
@@ -517,11 +541,7 @@ class Secretary<K, T> {
       tasks.remove(key);
       task = task.withSuccess(result);
       task.onComplete?.call(result);
-      _addEvent(SuccessEvent(
-        key: key,
-        result: result,
-        errors: task.errors,
-      ));
+      _addEvent(SuccessEvent(key: key, result: result, errors: task.errors));
       task.completer.complete(Result.ok(result));
       task.finalCompleter.complete(Result.ok(result));
       _emitState();

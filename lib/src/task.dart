@@ -53,21 +53,20 @@ class SecretaryTask<K, T> {
     List<Result<T, Object>>? results,
     Completer<Result<T, Object>>? completer,
     Completer<Result<T, Object>>? finalCompleter,
-  }) =>
-      SecretaryTask<K, T>(
-        key: key ?? this.key,
-        task: task ?? this.task,
-        validator: validator ?? this.validator,
-        onComplete: onComplete ?? this.onComplete,
-        onError: onError ?? this.onError,
-        retryIf: retryIf ?? this.retryIf,
-        retryPolicy: retryPolicy ?? this.retryPolicy,
-        retryDelay: retryDelay ?? this.retryDelay,
-        maxAttempts: maxAttempts ?? this.maxAttempts,
-        results: results ?? this.results,
-        completer: completer ?? this.completer,
-        finalCompleter: finalCompleter ?? this.finalCompleter,
-      );
+  }) => SecretaryTask<K, T>(
+    key: key ?? this.key,
+    task: task ?? this.task,
+    validator: validator ?? this.validator,
+    onComplete: onComplete ?? this.onComplete,
+    onError: onError ?? this.onError,
+    retryIf: retryIf ?? this.retryIf,
+    retryPolicy: retryPolicy ?? this.retryPolicy,
+    retryDelay: retryDelay ?? this.retryDelay,
+    maxAttempts: maxAttempts ?? this.maxAttempts,
+    results: results ?? this.results,
+    completer: completer ?? this.completer,
+    finalCompleter: finalCompleter ?? this.finalCompleter,
+  );
 
   SecretaryTask<K, T> withResult(Result<T, Object> result) =>
       copyWith(results: [...results, result]);

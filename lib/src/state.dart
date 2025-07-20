@@ -51,10 +51,10 @@ class TaskState<K, T> {
   });
 
   factory TaskState.fromTask(SecretaryTask<K, T> task) => TaskState(
-        key: task.key,
-        maxAttempts: task.maxAttempts,
-        results: task.results,
-      );
+    key: task.key,
+    maxAttempts: task.maxAttempts,
+    results: task.results,
+  );
 }
 
 class RecurringTaskState<K, T> {
@@ -73,18 +73,14 @@ class RecurringTaskState<K, T> {
   });
 
   factory RecurringTaskState.fromTask(
-          RecurringTask<K, T> task, RecurringTaskStatus status) =>
-      RecurringTaskState(
-        key: task.key,
-        status: status,
-        maxRuns: task.maxRuns,
-        runs: task.runs.map((e) => TaskState<K, T>.fromTask(e)).toList(),
-      );
+    RecurringTask<K, T> task,
+    RecurringTaskStatus status,
+  ) => RecurringTaskState(
+    key: task.key,
+    status: status,
+    maxRuns: task.maxRuns,
+    runs: task.runs.map((e) => TaskState<K, T>.fromTask(e)).toList(),
+  );
 }
 
-enum RecurringTaskStatus {
-  active,
-  queued,
-  waiting,
-  none;
-}
+enum RecurringTaskStatus { active, queued, waiting, none }

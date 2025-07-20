@@ -57,10 +57,10 @@ class RetryEvent<K, T> extends ErrorEvent<K, T> {
   });
 
   factory RetryEvent.fromTask(SecretaryTask<K, T> task) => RetryEvent(
-        key: task.key,
-        errors: [...task.errors],
-        maxAttempts: task.maxAttempts,
-      );
+    key: task.key,
+    errors: [...task.errors],
+    maxAttempts: task.maxAttempts,
+  );
 
   @override
   String toString() => 'RetryEvent($key, $attempts/$maxAttempts, $error)';
@@ -73,9 +73,9 @@ class FailureEvent<K, T> extends ErrorEvent<K, T> {
   });
 
   factory FailureEvent.fromTask(SecretaryTask<K, T> task) => FailureEvent(
-        key: task.key,
-        errors: task.errors,
-      );
+    key: task.key,
+    errors: task.errors,
+  );
 
   @override
   String toString() => 'FailureEvent($key, $attempts/$attempts, $error)';
