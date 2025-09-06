@@ -1,3 +1,4 @@
+import 'package:elegant/elegant.dart' show Result;
 import 'package:secretary/secretary.dart';
 
 typedef VoidCallback = void Function();

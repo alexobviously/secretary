@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' show Random;
+import 'package:elegant/elegant.dart' show Result;
 import 'package:secretary/secretary.dart';
 import 'package:secretary/src/link_data.dart';
 

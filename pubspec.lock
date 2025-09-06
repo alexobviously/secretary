@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  elegant:
+    dependency: "direct main"
+    description:
+      name: elegant
+      sha256: "86d709f9b95b3cc9a1f7c1ad108481e7379dbdefbdd0415c23b6db36be5055ba"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   file:
     dependency: transitive
     description:

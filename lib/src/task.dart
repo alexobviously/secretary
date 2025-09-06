@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:elegant/elegant.dart' show Result;
 import 'package:secretary/secretary.dart';
 
 class SecretaryTask<K, T> {

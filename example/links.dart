@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:elegant/elegant.dart' show Result;
 import 'package:rxdart/rxdart.dart';
 import 'package:secretary/secretary.dart';
 

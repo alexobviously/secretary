@@ -1,5 +1,5 @@
+import 'package:elegant/elegant.dart' show Result;
 import 'package:rest_client/rest_client.dart' as rc;
-import 'package:secretary/secretary.dart';
 
 typedef TimeResult = Result<DateTime, String>;
 
