@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show Random;
 import 'package:secretary/secretary.dart';
 import 'package:secretary/src/link_data.dart';
 
@@ -563,6 +564,9 @@ class Secretary<K, T> {
           break;
         case QueuePolicy.frontOfQueue:
           queue.insert(0, task.key);
+          break;
+        case QueuePolicy.random:
+          queue.insert(Random().nextInt(queue.length + 1), task.key);
           break;
       }
       final event = RetryEvent.fromTask(task);

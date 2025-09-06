@@ -18,6 +18,9 @@ enum QueuePolicy {
 
   /// Tasks will be retried immediately.
   frontOfQueue,
+
+  /// Tasks will be placed in a random position in the queue.
+  random,
 }
 
 /// Dictates what the Secretary will wait for when `stop()` or `dispose()`
