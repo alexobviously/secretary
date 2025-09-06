@@ -115,5 +115,28 @@ void main() {
         );
       },
     );
+
+    test('with taskBuilder and addKey', () async {
+      Future<String> hello(String key) async {
+        await Future.delayed(Duration(milliseconds: 100));
+        return 'hello $key';
+      }
+
+      Secretary<String, String> secretary = Secretary(
+        taskBuilder: (key) => hello(key),
+      );
+      expectLater(
+        secretary.resultStream,
+        emitsInOrder(['hello alex', 'hello callum', 'hello steve']),
+      );
+      secretary.addKey('alex');
+      secretary.addKey('callum');
+      secretary.addKey('steve');
+    });
+  });
+
+  test('addKey throws if no taskBuilder', () {
+    Secretary<int, String> secretary = Secretary();
+    expect(() => secretary.addKey(0), throwsArgumentError);
   });
 }

@@ -16,6 +16,10 @@ class Secretary<K, T> {
   /// The amount of time to wait before retrying a task, if it was the last task attempted.
   final Duration retryDelay;
 
+  /// An optional function that builds tasks from a key.
+  /// Use in conjunction with [addKey]. [add] will not respect this.
+  final Future<T> Function(K key)? taskBuilder;
+
   /// A validator function that will be called on results to determine if the
   /// task succeeded.
   /// It should return null if the task was considered a success, and the error otherwise.
@@ -48,6 +52,7 @@ class Secretary<K, T> {
     this.maxConcurrentTasks = 1,
     this.checkInterval = const Duration(milliseconds: 50),
     this.retryDelay = const Duration(milliseconds: 1000),
+    this.taskBuilder,
     this.validator = Validators.pass,
     this.recurringValidator = RecurringValidators.pass,
     this.retryIf = RetryIf.alwaysRetry,
@@ -140,6 +145,7 @@ class Secretary<K, T> {
   final List<LinkData> _links = [];
 
   /// Adds an item to the queue.
+  ///
   /// [key] is used to identify the task, and should conform to the K type
   /// constraint of the Secretary. It isn't really important what the [key] is,
   /// but note that tasks with keys that already exist in the queue will be rejected.
@@ -192,6 +198,40 @@ class Secretary<K, T> {
     return true;
   }
 
+  /// Adds an item to the queue using the [taskBuilder] specified in the
+  /// Secretary. This function throws an ArgumentError if no [taskBuilder] is
+  /// specified. Use [add()] if you want to specify a task directly.
+  ///
+  /// [key] is used to identify the task, and should conform to the K type
+  /// constraint of the Secretary. It isn't really important what the [key] is,
+  /// but note that tasks with keys that already exist in the queue will be rejected.
+  ///
+  /// If [index] is specified, then the item will be inserted at that point in
+  /// the queue, otherwise it will be added to the end. A negative index can
+  /// also be used, e.g. -1 will add the task as the second last element.
+  ///
+  /// [onComplete] and [onError] will be called on completion and error events
+  /// for this task, respectively. These are not required; all of the events
+  /// for all tasks are passed to the streams in `Secretary`.
+  ///
+  /// Use [overrides] to override parameters of the Secretary for this task only,
+  /// such as [validator] and [maxAttempts].
+  bool addKey(
+    K key, {
+    int? index,
+    Callback<T>? onComplete,
+    Callback<ErrorEvent<K, T>>? onError,
+    TaskOverrides<T> overrides = const TaskOverrides.none(),
+  }) {
+    if (taskBuilder == null) {
+      throw ArgumentError(
+        'Secretary instance has no taskBuilder. '
+        'Either use add() or provide a taskBuilder.',
+      );
+    }
+    return add(key, () => taskBuilder!(key));
+  }
+
   /// Adds a recurring task.
   ///
   /// Either a [task] or a [taskBuilder] must be provided, but not both.
@@ -226,7 +266,7 @@ class Secretary<K, T> {
     Callback<ErrorEvent<K, T>>? onError,
   }) {
     if (!(task != null || taskBuilder != null)) {
-      throw Exception(
+      throw ArgumentError(
         'Either a task or a taskBuilder must be provided, but not both.',
       );
     }

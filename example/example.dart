@@ -8,6 +8,7 @@ import 'agify.dart';
 
 void main(List<String> args) async {
   final secretary = Secretary<String, AgePredictionResult>(
+    taskBuilder: (key) => getAge(key),
     maxAttempts: 20,
     validator: Validators.resultOk,
     retryIf: RetryIf.notSingle('invalid_name'),
@@ -25,7 +26,7 @@ void main(List<String> args) async {
         .magenta(),
   );
 
-  void addName(String name) => secretary.add(name, () => getAge(name));
+  void addName(String name) => secretary.addKey(name);
   void addNameMulti(String str) => str.split(', ').forEach(addName);
 
   void handleInput(String input) {

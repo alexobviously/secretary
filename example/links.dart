@@ -4,9 +4,13 @@ import 'package:elegant/elegant.dart' show Result;
 import 'package:rxdart/rxdart.dart';
 import 'package:secretary/secretary.dart';
 
+// See: https://github.com/alexobviously/secretary/issues/3
+
 void main(List<String> args) async {
   final fileDataList = List.generate(
-      20, (i) => FileData(i.toString(), Random().nextInt(100000).toString()));
+    20,
+    (i) => FileData(i.toString(), Random().nextInt(100000).toString()),
+  );
 
   final uploadSec = Secretary<String, Result<StorageFile, int>>(
     maxAttempts: 5,

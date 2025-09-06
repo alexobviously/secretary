@@ -44,6 +44,21 @@ for (String p in paths) {
 }
 ```
 
+### Alternative, simplified approach
+In this case, all of the tasks we are adding to this secretary behave the same, with the only parameter being the key. There is a simplified API for use cases where this is true:
+
+```dart
+final secretary = Secretary<String, int>(
+    taskBuilder: (key) => uploadFile(p),
+);
+
+final paths = ['0001.mov', '0002.mov', '0003.mov'];
+for (String p in paths) {
+    secretary.add(p);
+}
+```
+
+
 ## What about errors?
 Let's say you have the above use case, but you want to make a record of files that fail to upload?
 Well you can simply add this line:
