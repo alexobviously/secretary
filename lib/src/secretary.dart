@@ -270,7 +270,7 @@ class Secretary<K, T> {
         'Either a task or a taskBuilder must be provided, but not both.',
       );
     }
-    RecurringTask<K, T> recurringTask = RecurringTask(
+    final RecurringTask<K, T> recurringTask = RecurringTask(
       key: key,
       task: task,
       taskBuilder: taskBuilder,
@@ -284,11 +284,11 @@ class Secretary<K, T> {
     );
     recurringTasks[key] = recurringTask;
     _emitState();
-    Timer t = Timer(
+    final timer = Timer(
       runImmediately ? Duration.zero : interval,
       _buildTimerCallback(recurringTask),
     );
-    _timers[key] = t;
+    _timers[key] = timer;
     return true;
   }
 
@@ -383,11 +383,13 @@ class Secretary<K, T> {
   Future<void> dispose() async {
     await stop();
     _setStatus(SecretaryStatus.disposed);
-    _streamController.close();
-    _statusStreamController.close();
-    for (final l in _links) {
-      l.dispose();
-    }
+
+    await Future.wait([
+      _streamController.close(),
+      _statusStreamController.close(),
+      for (final l in _links) l.dispose(),
+    ]);
+
     _links.clear();
   }
 
@@ -500,8 +502,10 @@ class Secretary<K, T> {
       }
 
       if (queue.isNotEmpty) {
-        Future<SecretaryTask<K, T>?> future = _doNextTask()
+        final Future<SecretaryTask<K, T>?> future = _doNextTask()
+          // ignore: unawaited_futures
           ..then(_handleRecurring);
+
         if (!hasTaskCapacity) {
           await future;
         }
@@ -523,7 +527,7 @@ class Secretary<K, T> {
       _emitState();
     }
     if (recurringTask.canRun) {
-      Timer timer = Timer(
+      final timer = Timer(
         recurringTask.interval,
         _buildTimerCallback(recurringTask),
       );
@@ -571,7 +575,7 @@ class Secretary<K, T> {
       await Future.delayed(task.retryDelay);
     }
 
-    T result = await task.task();
+    final T result = await task.task();
     Object? error;
 
     if (task.validator != null) {

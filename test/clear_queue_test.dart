@@ -70,7 +70,7 @@ void main() {
       expect(states.length, greaterThan(0));
       expect(states.last.queue, isEmpty);
 
-      subscription.cancel();
+      await subscription.cancel();
     });
 
     test('returns empty list when queue is already empty', () {

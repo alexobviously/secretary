@@ -54,7 +54,7 @@ final secretary = Secretary<String, int>(
 
 final paths = ['0001.mov', '0002.mov', '0003.mov'];
 for (String p in paths) {
-    secretary.add(p);
+    secretary.addKey(p);
 }
 ```
 

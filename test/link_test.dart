@@ -1,3 +1,5 @@
+// ignore_for_file: unawaited_futures
+
 import 'package:secretary/secretary.dart';
 import 'package:test/test.dart';
 

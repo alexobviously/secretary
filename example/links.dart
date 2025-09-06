@@ -33,15 +33,18 @@ void main(List<String> args) async {
   // feedback
   uploadSec.resultStream.listen((e) => print('Uploaded file: ${e.object!.id}'));
   createSec.resultStream.listen(
-      (e) => print('Created doc: ${e.object!.id} (${e.object!.fileId})'));
+    (e) => print('Created doc: ${e.object!.id} (${e.object!.fileId})'),
+  );
 
   // errors
   uploadSec.errorStream.listen(
-      (e) => print('Error uploading file: ${e.key} [${e.attempts} attempts, '
-          'final: ${e.isFinal}]'));
+    (e) => print('Error uploading file: ${e.key} [${e.attempts} attempts, '
+        'final: ${e.isFinal}]'),
+  );
   createSec.errorStream.listen(
-      (e) => print('Error creating doc: ${e.key} [${e.attempts} attempts, '
-          'final: ${e.isFinal}]'));
+    (e) => print('Error creating doc: ${e.key} [${e.attempts} attempts, '
+        'final: ${e.isFinal}]'),
+  );
   // you would probably also want to check for final failures here and clean
   // up the file you uploaded and restart or something
 
@@ -51,10 +54,11 @@ void main(List<String> args) async {
   }
 
   final countStream = Rx.combineLatest2<SecretaryState, SecretaryState, int>(
-      uploadSec.stateStream,
-      createSec.stateStream,
-      (a, b) =>
-          a.active.length + a.queue.length + b.active.length + b.queue.length);
+    uploadSec.stateStream,
+    createSec.stateStream,
+    (a, b) =>
+        a.active.length + a.queue.length + b.active.length + b.queue.length,
+  );
 
   await for (int c in countStream) {
     // end this script when the list is done
@@ -66,7 +70,7 @@ void main(List<String> args) async {
 Future<Result<StorageFile, int>> uploadFile(FileData data) async {
   // upload the file
   await Future.delayed(Duration(milliseconds: Random().nextInt(1000) + 500));
-  int result = Random().nextInt(10);
+  final result = Random().nextInt(10);
   return result > 8 ? Result.error(403) : Result.ok(StorageFile(data.id));
 }
 
@@ -74,8 +78,8 @@ Future<Result<StorageFile, int>> uploadFile(FileData data) async {
 Future<Result<FirestoreDoc, int>> createDoc(StorageFile file) async {
   // create the doc
   await Future.delayed(Duration(milliseconds: Random().nextInt(1000) + 500));
-  int result = Random().nextInt(10);
-  String id = Random().nextInt(100000000).toString();
+  final result = Random().nextInt(10);
+  final id = Random().nextInt(100000000).toString();
   return result > 8
       ? Result.error(403)
       : Result.ok(FirestoreDoc(id: id, fileId: file.id));

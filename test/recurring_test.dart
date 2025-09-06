@@ -6,7 +6,7 @@ import 'helpers.dart';
 void main() {
   group('Basic Tests', () {
     test('Single limited recurring test', () {
-      Secretary<int, String> secretary = Secretary();
+      final secretary = Secretary<int, String>();
       expectLater(
         secretary.resultStream,
         emitsInOrder(
@@ -21,8 +21,8 @@ void main() {
     });
 
     test('Recurring with taskBuilder', () {
-      Secretary<int, String> secretary = Secretary();
-      List<String> values = ['foo', 'baz', 'bar'];
+      final secretary = Secretary<int, String>();
+      final values = ['foo', 'baz', 'bar'];
       expectLater(secretary.resultStream, emitsInOrder(values));
       secretary.addRecurring(
         0,
@@ -34,12 +34,12 @@ void main() {
     });
 
     test('Recurring with validator', () async {
-      Secretary<int, String> secretary = Secretary(
+      final secretary = Secretary<int, String>(
         validator: Validators.matchSingle('ok'),
         recurringValidator: RecurringValidators.lastRunSucceeded,
       );
-      List<String> values = ['ok', 'ok', 'fail', 'ok'];
-      List<SecretaryEvent> events = [];
+      final values = ['ok', 'ok', 'fail', 'ok'];
+      final events = <SecretaryEvent>[];
       secretary.stream.listen(events.add);
       secretary.addRecurring(
         0,

@@ -9,13 +9,14 @@ Future<TimeResult> getTime(
 }) async {
   try {
     final req = rc.Request(
-        url: 'https://timeapi.io/api/Time/current/zone?timeZone=$timeZone');
+      url: 'https://timeapi.io/api/Time/current/zone?timeZone=$timeZone',
+    );
     final resp = await rc.Client().execute(
       request: req,
       throwRestExceptions: false,
     );
     if (resp.statusCode != 200) {
-      return Result.error('${resp.statusCode.toString()}: ${resp.body}');
+      return Result.error('${resp.statusCode}: ${resp.body}');
     }
     return Result.ok(DateTime.parse(resp.body['dateTime']).add(timeTravel));
   } catch (e) {

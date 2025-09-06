@@ -21,11 +21,11 @@ class SecretaryState<K, T> {
 
   @override
   String toString() {
-    String activeStr =
+    final activeStr =
         'active: ${active.length} ${activeKeys.take(3)}${active.length > 3 ? '...' : ''}';
-    String queueStr =
+    final queueStr =
         'queue: ${queue.length} ${queueKeys.take(3)}${queue.length > 3 ? '...' : ''}';
-    String recurringStr =
+    final recurringStr =
         'recurring: ${recurring.length} ${recurringKeys.take(3)}${recurring.length > 3 ? '...' : ''}';
     return 'SecretaryState(status: ${status.name}, $activeStr, $queueStr, $recurringStr)';
   }

@@ -1,7 +1,11 @@
 name: secretary
 description: A sophisticated tool for managing queues of asynchronous tasks, with a stream interface, strong typing and lots of helpful options.
-version: 1.2.0
 repository: https://github.com/alexobviously/secretary
+version: 1.2.0
+
+topics:
+  - queue
+  - async
 
 environment:
   sdk: '>=3.8.0 <4.0.0'

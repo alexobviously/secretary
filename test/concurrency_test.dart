@@ -14,12 +14,12 @@ void main() {
 
 void _concurrencyTest(int concurrency, int expected) async {
   test('Concurrency: $concurrency', () async {
-    Secretary<int, int> secretary = Secretary(
+    final secretary = Secretary<int, int>(
       maxConcurrentTasks: concurrency,
       checkInterval: Duration(milliseconds: 5),
     );
-    List<int> values = List.generate(10, (i) => i);
-    List<int> results = [];
+    final values = List.generate(10, (i) => i);
+    final results = <int>[];
     secretary.resultStream.listen(results.add);
     for (int i in values) {
       secretary.add(i, () => delayedValue(i, Duration(milliseconds: 100)));

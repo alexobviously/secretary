@@ -17,7 +17,7 @@ void main(List<String> args) async {
     maxRuns: 5,
     queuePolicy: QueuePolicy.frontOfQueue,
   );
-  DateTime cutoffTime = DateTime.now().add(Duration(days: 4));
+  final cutoffTime = DateTime.now().add(Duration(days: 4));
   secretary.addRecurring(
     'Brazil/East',
     taskBuilder: (params) => () => getTime(

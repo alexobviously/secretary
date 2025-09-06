@@ -22,8 +22,8 @@ void main(List<String> args) async {
   printStatus(secretary.status);
   print(
     Colorize(
-            'Enter names to get predictions of their ages\nOther commands: start, stop')
-        .magenta(),
+      'Enter names to get predictions of their ages\nOther commands: start, stop',
+    ).magenta(),
   );
 
   void addName(String name) => secretary.addKey(name);
@@ -44,12 +44,14 @@ void main(List<String> args) async {
 
 void printResult(AgePredictionResult result) {
   final object = result.object!;
-  print(Colorize('${object.name} is probably about ${object.age} years old.')
-      .green());
+  print(
+    Colorize('${object.name} is probably about ${object.age} years old.')
+        .green(),
+  );
 }
 
 void printError(ErrorEvent<String, AgePredictionResult> event) {
-  String message =
+  final message =
       '${event.isFailure ? 'Failure' : 'Error'}: ${event.error} for key ${event.key} [${event.attempts}/${event.maxAttempts}]';
   final c = Colorize(message);
   if (event.isFailure) {

@@ -6,10 +6,10 @@ import 'helpers.dart';
 void main() {
   group('Stop Policies', () {
     test('StopPolicy.stopImmediately', () async {
-      Secretary<int, int> secretary = Secretary(
+      final secretary = Secretary<int, int>(
         stopPolicy: StopPolicy.stopImmediately,
       );
-      List<int> results = [];
+      final results = <int>[];
       secretary.resultStream.listen(results.add);
       secretary.add(0, () => delayedValue(0, Duration(milliseconds: 500)));
       secretary.add(1, () => delayedValue(1, Duration(milliseconds: 500)));
@@ -20,10 +20,10 @@ void main() {
     });
 
     test('StopPolicy.finishActive', () async {
-      Secretary<int, int> secretary = Secretary(
+      final secretary = Secretary<int, int>(
         stopPolicy: StopPolicy.finishActive,
       );
-      List<int> results = [];
+      final results = <int>[];
       secretary.resultStream.listen(results.add);
       secretary.add(0, () => delayedValue(0, Duration(milliseconds: 500)));
       secretary.add(1, () => delayedValue(1, Duration(milliseconds: 500)));
@@ -34,10 +34,10 @@ void main() {
     });
 
     test('StopPolicy.finishQueue', () async {
-      Secretary<int, int> secretary = Secretary(
+      final secretary = Secretary<int, int>(
         stopPolicy: StopPolicy.finishQueue,
       );
-      List<int> results = [];
+      final results = <int>[];
       secretary.resultStream.listen(results.add);
       secretary.add(0, () => delayedValue(0, Duration(milliseconds: 500)));
       secretary.add(1, () => delayedValue(1, Duration(milliseconds: 500)));
@@ -48,10 +48,10 @@ void main() {
     });
 
     test('StopPolicy.finishRecurring', () async {
-      Secretary<int, int> secretary = Secretary(
+      final secretary = Secretary<int, int>(
         stopPolicy: StopPolicy.finishRecurring,
       );
-      List<int> results = [];
+      final results = <int>[];
       secretary.resultStream.listen(results.add);
       secretary.addRecurring(
         0,
@@ -64,10 +64,10 @@ void main() {
     });
 
     test('StopPolicy.finishQueue, with recurring task', () async {
-      Secretary<int, int> secretary = Secretary(
+      final secretary = Secretary<int, int>(
         stopPolicy: StopPolicy.finishQueue,
       );
-      List<int> results = [];
+      final results = <int>[];
       secretary.resultStream.listen(results.add);
       secretary.addRecurring(
         0,
