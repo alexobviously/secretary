@@ -1,3 +1,9 @@
+## 1.2.0
+- Added `taskBuilder` param and `addKey()` to `Secretary`. This provides a simplified API for common use cases where the task only changes with respect to the key. You can now build a secretary like `Secretary(taskBuilder: (key) => doThing(key))`, `secretary.addKey(key)` instead of having to specify the task in `add`.
+- `QueuePolicy.random()`: inserts at a random point in the queue.
+- `SecretaryError` and `SecretaryEvent` are now sealed classes.
+- Bumped packages.
+
 ## 1.1.0
 - Increased Dart lower constraint to 3.8.0.
 - Added `Secretary.clearQueue()`.
