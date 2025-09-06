@@ -1,4 +1,4 @@
-class SecretaryError {
+sealed class SecretaryError {
   const SecretaryError();
 }
 

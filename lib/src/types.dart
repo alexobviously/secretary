@@ -8,12 +8,7 @@ typedef Callback<T> = void Function(T e);
 typedef RetryTest = bool Function(Object?);
 typedef RecurringValidator<K, T> = bool Function(ExecutionParams<K, T> params);
 
-enum SecretaryStatus {
-  idle,
-  active,
-  stopping,
-  disposed,
-}
+enum SecretaryStatus { idle, active, stopping, disposed }
 
 /// Dictates what to do with a task that needs to be queued, such as a retried
 /// task, i.e. should it return to the back of the queue or be retried immediately?

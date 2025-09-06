@@ -1,6 +1,6 @@
 import 'package:secretary/secretary.dart';
 
-class SecretaryEvent<K, T> {
+sealed class SecretaryEvent<K, T> {
   final K key;
   final List<Object> errors;
 
