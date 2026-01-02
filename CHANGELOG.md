@@ -1,3 +1,6 @@
+## 1.2.1
+- Bump SDK constraint to 3.10.0, elegant to 1.0.0.
+
 ## 1.2.0
 - Added `taskBuilder` param and `addKey()` to `Secretary`. This provides a simplified API for common use cases where the task only changes with respect to the key. You can now build a secretary like `Secretary(taskBuilder: (key) => doThing(key))`, `secretary.addKey(key)` instead of having to specify the task in `add`.
 - `QueuePolicy.random()`: inserts at a random point in the queue.

@@ -14,7 +14,7 @@ jobs:
       image: dart:latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Print Dart SDK version
         run: dart --version
