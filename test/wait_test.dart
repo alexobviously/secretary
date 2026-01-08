@@ -21,7 +21,7 @@ void main() {
       final values = [-2, -4, 6];
       secretary.add(
         0,
-        () => Future.delayed(Duration(milliseconds: 200), () => values[i++]),
+        () => .delayed(Duration(milliseconds: 200), () => values[i++]),
       );
       final result = await secretary.waitForResult(0);
       expect(result.object, 6);
@@ -36,7 +36,7 @@ void main() {
       final values = [-2, -4, 6];
       secretary.add(
         0,
-        () => Future.delayed(Duration(milliseconds: 200), () => values[i++]),
+        () => .delayed(Duration(milliseconds: 200), () => values[i++]),
       );
       final result = await secretary.waitForResult(0, waitForFinal: false);
       expect(result.error, InvalidValueError(-2));
@@ -47,7 +47,7 @@ void main() {
       for (int i in List.generate(3, (i) => i)) {
         secretary.add(
           i,
-          () => Future.delayed(Duration(milliseconds: 200), () => i),
+          () => .delayed(Duration(milliseconds: 200), () => i),
         );
       }
       expect(secretary.state.numTasks, 3);

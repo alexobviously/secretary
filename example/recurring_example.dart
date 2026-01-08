@@ -15,12 +15,13 @@ void main(List<String> args) async {
     task: () => getTime('Asia/Saigon'),
     interval: Duration(seconds: 3),
     maxRuns: 5,
-    queuePolicy: QueuePolicy.frontOfQueue,
+    queuePolicy: .frontOfQueue,
   );
   final cutoffTime = DateTime.now().add(Duration(days: 4));
   secretary.addRecurring(
     'Brazil/East',
-    taskBuilder: (params) => () => getTime(
+    taskBuilder: (params) =>
+        () => getTime(
           'Brazil/East',
           timeTravel: Duration(days: params.runIndex),
         ),

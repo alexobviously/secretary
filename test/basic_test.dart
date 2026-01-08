@@ -39,7 +39,7 @@ void main() {
         );
         secretary.add(
           0,
-          () => Future.delayed(Duration(milliseconds: 100), () => 'bad'),
+          () => .delayed(Duration(milliseconds: 100), () => 'bad'),
         );
       },
     );
@@ -61,7 +61,7 @@ void main() {
       int i = 0;
       secretary.add(
         0,
-        () => Future.delayed(Duration(milliseconds: 100), () => results[i++]),
+        () => .delayed(Duration(milliseconds: 100), () => results[i++]),
       );
     });
 
@@ -83,7 +83,7 @@ void main() {
       int i = 0;
       secretary.add(
         0,
-        () => Future.delayed(Duration(milliseconds: 100), () => results[i++]),
+        () => .delayed(Duration(milliseconds: 100), () => results[i++]),
       );
     });
 
@@ -104,7 +104,7 @@ void main() {
       int i = 0;
       secretary.add(
         0,
-        () => Future.delayed(Duration(milliseconds: 100), () => results[i++]),
+        () => .delayed(Duration(milliseconds: 100), () => results[i++]),
       );
     });
 

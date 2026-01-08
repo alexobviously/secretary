@@ -34,7 +34,7 @@ class SecretaryTask<K, T> {
     this.onError,
     this.retryIf = RetryIf.alwaysRetry,
     required this.retryPolicy,
-    this.retryDelay = Duration.zero,
+    this.retryDelay = .zero,
     required this.maxAttempts,
     this.results = const [],
     required this.completer,

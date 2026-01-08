@@ -14,4 +14,4 @@ Matcher hasKey<K, T>(K key) =>
 Future<T> delayedValue<T>(
   T value, [
   Duration delay = const Duration(milliseconds: 500),
-]) => Future.delayed(delay, () => value);
+]) => .delayed(delay, () => value);

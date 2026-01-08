@@ -33,9 +33,9 @@ class RecurringTask<K, T> {
     required this.maxRuns,
     this.runs = const [],
     this.interval = Duration.zero,
-    this.overrides = const TaskOverrides.none(),
+    this.overrides = const .none(),
     this.validator = RecurringValidators.pass,
-    this.queuePolicy = QueuePolicy.backOfQueue,
+    this.queuePolicy = .backOfQueue,
     this.onComplete,
     this.onError,
   }) : assert(
