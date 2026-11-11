@@ -8,7 +8,14 @@ void main(List<String> args) async {
     task: () => getTime('Europe/Lisbon'),
     interval: Duration(seconds: 5),
     runImmediately: true,
-    onComplete: (res) => print('In Lisbon it is ${res.object}'),
+    onComplete: (result) {
+      switch (result) {
+        case Ok(:final value):
+          print('In Lisbon it is $value');
+        case Err(:final error):
+          print('Failed to get the time in Lisbon: $error');
+      }
+    },
   );
   secretary.addRecurring(
     'Asia/Saigon',
@@ -21,14 +28,13 @@ void main(List<String> args) async {
   secretary.addRecurring(
     'Brazil/East',
     taskBuilder: (params) =>
-        () => getTime(
-          'Brazil/East',
-          timeTravel: Duration(days: params.runIndex),
-        ),
+        () =>
+            getTime('Brazil/East', timeTravel: Duration(days: params.runIndex)),
     interval: Duration(seconds: 5),
-    validator: (params) =>
-        params.runs.last.lastResult?.object?.object?.isBefore(cutoffTime) ??
-        false,
+    validator: (params) => switch (params.runs.last.lastResult) {
+      Ok(value: Ok(:final value)) => value.isBefore(cutoffTime),
+      _ => false,
+    },
   );
   secretary.stream.listen(print);
 }

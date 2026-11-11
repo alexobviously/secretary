@@ -43,7 +43,7 @@ void main(List<String> args) async {
 }
 
 void printResult(AgePredictionResult result) {
-  final object = result.object!;
+  final object = result.unwrap();
   print(
     Colorize('${object.name} is probably about ${object.age} years old.')
         .green(),

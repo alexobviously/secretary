@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:elegant/elegant.dart' show Result;
+
 import 'package:rxdart/rxdart.dart';
 import 'package:secretary/secretary.dart';
 
@@ -25,15 +25,15 @@ void main(List<String> args) async {
   );
 
   // link the two secretaries
-  uploadSec.link(createSec, (e) => createDoc(e.object!));
+  uploadSec.link(createSec, (e) => createDoc(e.unwrap()));
   // alternatively:
   // uploadSec.resultStream
-  //     .listen((e) => createSec.add(e.object!.id, () => createDoc(e.object!)));
+  //     .listen((e) => createSec.add(e.unwrap().id, () => createDoc(e.unwrap())));
 
   // feedback
-  uploadSec.resultStream.listen((e) => print('Uploaded file: ${e.object!.id}'));
+  uploadSec.resultStream.listen((e) => print('Uploaded file: ${e.unwrap().id}'));
   createSec.resultStream.listen(
-    (e) => print('Created doc: ${e.object!.id} (${e.object!.fileId})'),
+    (e) => print('Created doc: ${e.unwrap().id} (${e.unwrap().fileId})'),
   );
 
   // errors

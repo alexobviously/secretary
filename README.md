@@ -89,7 +89,7 @@ In this case, tasks that result in a 415 error will be declared failures, and yo
 If you want to get the value of a specific task asynchronously, you can use `Secretary.waitForResult(key)`, for example:
 
 ```dart
-Future<Result<Something, Error>> getValue(int thingId) async {
+Future<Result<Something, Object>> getValue(int thingId) async {
     if(results.containsKey(thingId)) {
         // Checking some local map of results first.
         return results[thingId];
@@ -102,6 +102,15 @@ Future<Result<Something, Error>> getValue(int thingId) async {
     // secretary.listen when you create it instead.
     return result;
 }
+```
+
+`Result` is a sealed `Ok`/`Err` type, so handle both outcomes exhaustively:
+
+```dart
+final message = switch (await secretary.waitForResult(thingId)) {
+    Ok(:final value) => 'Loaded $value',
+    Err(:final error) => 'Failed: $error',
+};
 ```
 
 ## Linking

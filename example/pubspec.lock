@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: elegant
-      sha256: e43fc82160c8b010f870013e7d8f57f8f76925cbbaa9d6497091ef19cd19edc5
+      sha256: dd368ad481322783a5cb449ae77be94bff8d6027cb0b96f32081a2c9075209f4
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "2.0.1"
   http:
     dependency: transitive
     description:
@@ -170,4 +170,4 @@ packages:
     source: hosted
     version: "3.0.7"
 sdks:
-  dart: ">=3.10.0 <4.0.0"
+  dart: ">=3.13.7 <4.0.0"

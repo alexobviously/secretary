@@ -1,4 +1,3 @@
-import 'package:elegant/elegant.dart' show Result;
 import 'package:secretary/secretary.dart';
 
 class SecretaryState<K, T> {
@@ -36,11 +35,10 @@ class TaskState<K, T> {
   final int maxAttempts;
   final List<Result<T, Object>> results;
 
-  List<Object> get errors =>
-      results.where((e) => !e.ok).map((e) => e.error!).toList();
+  List<Object> get errors => results.errs.values.toList();
   int get attempts => results.length;
   bool get canRetry => attempts < maxAttempts;
-  bool get succeeded => results.isNotEmpty && results.last.ok;
+  bool get succeeded => results.isNotEmpty && results.last is Ok;
   bool get failed => !canRetry && !succeeded;
   bool get finished => !canRetry || succeeded;
   Result<T, Object>? get lastResult => results.isNotEmpty ? results.last : null;

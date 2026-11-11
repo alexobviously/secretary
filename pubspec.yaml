@@ -8,10 +8,10 @@ topics:
   - async
 
 environment:
-  sdk: ^3.10.0
+  sdk: ^3.13.7
 
 dependencies:
-  elegant: ^1.0.0
+  elegant: ^2.0.1
 
 dev_dependencies:
   lints: ^6.0.0

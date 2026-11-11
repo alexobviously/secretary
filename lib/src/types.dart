@@ -1,4 +1,3 @@
-import 'package:elegant/elegant.dart' show Result;
 import 'package:secretary/secretary.dart';
 
 typedef VoidCallback = void Function();
@@ -99,8 +98,11 @@ class Validators {
       (T val) => !targets.contains(val) ? null : InvalidValueError(val);
 
   /// Valid if the result (a `Result` object) is ok.
-  static Object? resultOk<T, E>(Result<T, E> result) =>
-      result.ok ? null : result.error!;
+  static Object? resultOk<T, E extends Object>(Result<T, E> result) =>
+      switch (result) {
+        Ok() => null,
+        Err(:final error) => error,
+      };
 }
 
 /// A collection of common `RecurringValidator` generators.

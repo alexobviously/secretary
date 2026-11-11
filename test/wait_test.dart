@@ -9,7 +9,7 @@ void main() {
       final secretary = Secretary<int, int>();
       secretary.add(0, () => delayedValue(0));
       final result = await secretary.waitForResult(0);
-      expect(result.object, 0);
+      expect(result.unwrap(), 0);
     });
 
     test('Wait for result, retries, waitForFinal: true', () async {
@@ -24,7 +24,7 @@ void main() {
         () => .delayed(Duration(milliseconds: 200), () => values[i++]),
       );
       final result = await secretary.waitForResult(0);
-      expect(result.object, 6);
+      expect(result.unwrap(), 6);
     });
 
     test('Wait for result, retries, waitForFinal: false', () async {
@@ -39,7 +39,7 @@ void main() {
         () => .delayed(Duration(milliseconds: 200), () => values[i++]),
       );
       final result = await secretary.waitForResult(0, waitForFinal: false);
-      expect(result.error, InvalidValueError(-2));
+      expect(result.unwrapError(), InvalidValueError(-2));
     });
 
     test('Wait for empty', () async {

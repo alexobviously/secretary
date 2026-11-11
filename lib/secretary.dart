@@ -1,3 +1,12 @@
+export 'package:elegant/elegant.dart'
+    show
+        Err,
+        ErrIterableExtension,
+        Ok,
+        OkIterableExtension,
+        Result,
+        ResultIterableExtension;
+
 export 'src/errors.dart';
 export 'src/event.dart';
 export 'src/execution_params.dart';
