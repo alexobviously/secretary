@@ -25,7 +25,7 @@ enum QueuePolicy {
 
 /// Dictates what the Secretary will wait for when `stop()` or `dispose()`
 /// are called.
-enum StopPolicy {
+enum const StopPolicy(final int value) {
   /// Immediately stops work, regardless of tasks in progress.
   stopImmediately(0),
 
@@ -41,9 +41,6 @@ enum StopPolicy {
   /// This could obviously go on forever, depending on the recurring tasks you
   /// have, so only use this in very well controlled conditions.
   finishRecurring(3);
-
-  final int value;
-  const StopPolicy(this.value);
 
   bool operator >(StopPolicy other) => value > other.value;
   bool operator >=(StopPolicy other) => value >= other.value;

@@ -1,3 +1,7 @@
+## 1.3.0
+- Migrate to elegant 2.0.2.
+- Some style improvements (dot shorthands, primary constructors).
+
 ## 1.2.1
 - Bump SDK constraint to 3.10.0, elegant to 1.0.0.
 

@@ -1,11 +1,6 @@
-sealed class SecretaryError {
-  const SecretaryError();
-}
+sealed class const SecretaryError();
 
-class TaskNotFoundError<K> extends SecretaryError {
-  final K key;
-  const TaskNotFoundError(this.key);
-
+class const TaskNotFoundError<K>(final K key) extends SecretaryError {
   @override
   bool operator ==(Object other) =>
       other is TaskNotFoundError && other.key == key;
@@ -14,10 +9,7 @@ class TaskNotFoundError<K> extends SecretaryError {
   int get hashCode => key.hashCode;
 }
 
-class InvalidValueError<T> extends SecretaryError {
-  final T value;
-  const InvalidValueError(this.value);
-
+class const InvalidValueError<T>(final T value) extends SecretaryError {
   @override
   bool operator ==(Object other) =>
       other is InvalidValueError && other.value == value;

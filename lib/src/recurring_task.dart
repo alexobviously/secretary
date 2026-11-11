@@ -1,17 +1,23 @@
 import 'package:secretary/secretary.dart';
 
-class RecurringTask<K, T> {
-  final K key;
-  final Task<T>? task;
-  final TaskBuilder<K, T>? taskBuilder;
-  final int maxRuns;
-  final List<SecretaryTask<K, T>> runs;
-  final Duration interval;
-  final TaskOverrides<T> overrides;
-  final RecurringValidator<K, T> validator;
-  final QueuePolicy queuePolicy;
-  final Callback<T>? onComplete;
-  final Callback<ErrorEvent<K, T>>? onError;
+class const RecurringTask<K, T>({
+  required final K key,
+  final Task<T>? task,
+  final TaskBuilder<K, T>? taskBuilder,
+  required final int maxRuns,
+  final List<SecretaryTask<K, T>> runs = const [],
+  final Duration interval = Duration.zero,
+  final TaskOverrides<T> overrides = const .none(),
+  final RecurringValidator<K, T> validator = RecurringValidators.pass,
+  final QueuePolicy queuePolicy = .backOfQueue,
+  final Callback<T>? onComplete,
+  final Callback<ErrorEvent<K, T>>? onError,
+}) {
+  this
+    : assert(
+        task != null || taskBuilder != null,
+        'Either a task or a taskBuilder must be provided, but not both.',
+      );
 
   int get numRuns => runs.length;
   bool get canRun =>
@@ -25,23 +31,6 @@ class RecurringTask<K, T> {
 
   /// Builds the task for the next run.
   Task<T> buildTask() => task ?? taskBuilder!(executionParams);
-
-  const RecurringTask({
-    required this.key,
-    this.task,
-    this.taskBuilder,
-    required this.maxRuns,
-    this.runs = const [],
-    this.interval = Duration.zero,
-    this.overrides = const .none(),
-    this.validator = RecurringValidators.pass,
-    this.queuePolicy = .backOfQueue,
-    this.onComplete,
-    this.onError,
-  }) : assert(
-         task != null || taskBuilder != null,
-         'Either a task or a taskBuilder must be provided, but not both.',
-       );
 
   RecurringTask<K, T> copyWith({
     K? key,

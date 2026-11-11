@@ -3,22 +3,13 @@ import 'package:rest_client/rest_client.dart' as rc;
 
 typedef AgePredictionResult = Result<AgePrediction, String>;
 
-class AgePrediction {
-  final String name;
-  final num age;
-  final num count;
-
-  const AgePrediction({
-    required this.name,
-    required this.age,
-    required this.count,
-  });
-
-  factory AgePrediction.fromJson(Map<String, dynamic> json) => AgePrediction(
-        name: json['name'],
-        age: json['age'],
-        count: json['count'],
-      );
+class const AgePrediction({
+  required final String name,
+  required final num age,
+  required final num count,
+}) {
+  factory fromJson(Map<String, dynamic> json) =>
+      AgePrediction(name: json['name'], age: json['age'], count: json['count']);
 
   @override
   String toString() => 'AgePrediction($name, $age, $count)';

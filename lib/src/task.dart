@@ -2,20 +2,20 @@ import 'dart:async';
 
 import 'package:secretary/secretary.dart';
 
-class SecretaryTask<K, T> {
-  final K key;
-  final Task<T> task;
-  final Validator<T>? validator;
-  final Callback<T>? onComplete;
-  final Callback<ErrorEvent<K, T>>? onError;
-  final RetryTest retryIf;
-  final QueuePolicy retryPolicy;
-  final Duration retryDelay;
-  final int maxAttempts;
-  final List<Result<T, Object>> results;
-  final Completer<Result<T, Object>> completer;
-  final Completer<Result<T, Object>> finalCompleter;
-
+class const SecretaryTask<K, T>({
+  required final K key,
+  required final Task<T> task,
+  final Validator<T>? validator,
+  final Callback<T>? onComplete,
+  final Callback<ErrorEvent<K, T>>? onError,
+  final RetryTest retryIf = RetryIf.alwaysRetry,
+  required final QueuePolicy retryPolicy,
+  final Duration retryDelay = .zero,
+  required final int maxAttempts,
+  final List<Result<T, Object>> results = const [],
+  required final Completer<Result<T, Object>> completer,
+  required final Completer<Result<T, Object>> finalCompleter,
+}) {
   List<Object> get errors => results.errs.values.toList();
   int get attempts => results.length;
   bool get canRetry => attempts < maxAttempts;
@@ -23,21 +23,6 @@ class SecretaryTask<K, T> {
   bool get failed => !canRetry && !succeeded;
   bool get finished => !canRetry || succeeded;
   Result<T, Object>? get lastResult => results.isNotEmpty ? results.last : null;
-
-  const SecretaryTask({
-    required this.key,
-    required this.task,
-    this.validator,
-    this.onComplete,
-    this.onError,
-    this.retryIf = RetryIf.alwaysRetry,
-    required this.retryPolicy,
-    this.retryDelay = .zero,
-    required this.maxAttempts,
-    this.results = const [],
-    required this.completer,
-    required this.finalCompleter,
-  });
 
   SecretaryTask<K, T> copyWith({
     K? key,

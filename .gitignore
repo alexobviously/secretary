@@ -4,5 +4,6 @@
 
 # Conventional directory for build output.
 build/
+coverage/
 
 .DS_Store

@@ -1,13 +1,11 @@
 import 'package:secretary/secretary.dart';
 
-sealed class SecretaryEvent<K, T> {
-  final K key;
-  final List<Object> errors;
-
+sealed class const SecretaryEvent<K, T>({
+  required final K key,
+  required final List<Object> errors,
+}) {
   Object get error => errors.last;
   int get attempts => errors.length;
-
-  const SecretaryEvent({required this.key, required this.errors});
 
   bool get isSuccess => this is SuccessEvent;
   bool get isError => this is ErrorEvent;
@@ -19,44 +17,36 @@ sealed class SecretaryEvent<K, T> {
   String toString() => 'SecretaryEvent($key)';
 }
 
-class SuccessEvent<K, T> extends SecretaryEvent<K, T> {
-  final T result;
-
+class const SuccessEvent<K, T>({
+  required super.key,
+  super.errors = const [],
+  required final T result,
+}) extends SecretaryEvent<K, T> {
   @override
   int get attempts => super.attempts + 1;
-
-  const SuccessEvent({
-    required super.key,
-    super.errors = const [],
-    required this.result,
-  });
 
   @override
   String toString() => 'SuccessEvent($key, $result, attempts: $attempts)';
 }
 
-class ErrorEvent<K, T> extends SecretaryEvent<K, T> {
-  const ErrorEvent({required super.key, required super.errors});
-
+class const ErrorEvent<K, T>({
+  required super.key,
+  required super.errors,
+}) extends SecretaryEvent<K, T> {
   int get maxAttempts => errors.length;
 
   @override
   String toString() => 'ErrorEvent($key, $attempts, $error)';
 }
 
-class RetryEvent<K, T> extends ErrorEvent<K, T> {
-  @override
-  final int maxAttempts;
-
+class const RetryEvent<K, T>({
+  required super.key,
+  required super.errors,
+  @override required final int maxAttempts,
+}) extends ErrorEvent<K, T> {
   int get attemptsLeft => maxAttempts - attempts;
 
-  const RetryEvent({
-    required super.key,
-    required super.errors,
-    required this.maxAttempts,
-  });
-
-  factory RetryEvent.fromTask(SecretaryTask<K, T> task) => RetryEvent(
+  factory fromTask(SecretaryTask<K, T> task) => RetryEvent(
     key: task.key,
     errors: [...task.errors],
     maxAttempts: task.maxAttempts,
@@ -66,13 +56,11 @@ class RetryEvent<K, T> extends ErrorEvent<K, T> {
   String toString() => 'RetryEvent($key, $attempts/$maxAttempts, $error)';
 }
 
-class FailureEvent<K, T> extends ErrorEvent<K, T> {
-  const FailureEvent({
-    required super.key,
-    required super.errors,
-  });
-
-  factory FailureEvent.fromTask(SecretaryTask<K, T> task) => FailureEvent(
+class const FailureEvent<K, T>({
+  required super.key,
+  required super.errors,
+}) extends ErrorEvent<K, T> {
+  factory fromTask(SecretaryTask<K, T> task) => FailureEvent(
     key: task.key,
     errors: task.errors,
   );
@@ -81,15 +69,11 @@ class FailureEvent<K, T> extends ErrorEvent<K, T> {
   String toString() => 'FailureEvent($key, $attempts/$attempts, $error)';
 }
 
-class RecurringTaskFinishedEvent<K, T> extends SecretaryEvent<K, T> {
-  final bool invalidated;
-
-  const RecurringTaskFinishedEvent({
-    required super.key,
-    required super.errors,
-    this.invalidated = false,
-  });
-
+class const RecurringTaskFinishedEvent<K, T>({
+  required super.key,
+  required super.errors,
+  final bool invalidated = false,
+}) extends SecretaryEvent<K, T> {
   @override
   String toString() => 'RecurringTaskFinishedEvent($key, $invalidated)';
 }

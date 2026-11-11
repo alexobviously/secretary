@@ -5,63 +5,52 @@ import 'package:secretary/secretary.dart';
 import 'package:secretary/src/link_data.dart';
 
 /// A task manager.
-class Secretary<K, T> {
+class Secretary<K, T>({
   /// The number of tasks that can execute simultaneously.
   /// To allow infinite concurrency (i.e. no queue), set this to 0.
-  final int maxConcurrentTasks;
+  final int maxConcurrentTasks = 1,
 
   /// The amount of time to wait before checking for new tasks when the queue is empty.
-  final Duration checkInterval;
+  final Duration checkInterval = const Duration(milliseconds: 50),
 
   /// The amount of time to wait before retrying a task, if it was the last task attempted.
-  final Duration retryDelay;
+  final Duration retryDelay = const Duration(milliseconds: 1000),
 
   /// An optional function that builds tasks from a key.
   /// Use in conjunction with [addKey]. [add] will not respect this.
-  final Future<T> Function(K key)? taskBuilder;
+  final Future<T> Function(K key)? taskBuilder,
 
   /// A validator function that will be called on results to determine if the
   /// task succeeded.
   /// It should return null if the task was considered a success, and the error otherwise.
-  final Validator<T> validator;
+  final Validator<T> validator = Validators.pass,
 
   /// A validator function that will determine if a recurring task should be
   /// continued each run. Takes an `ExecutionParams<K, T>` object in and returns
   /// a boolean. True means the recurring task will continue, and false stops it.
-  final RecurringValidator<K, T> recurringValidator;
+  final RecurringValidator<K, T> recurringValidator = RecurringValidators.pass,
 
   /// A test to determine if a task should be retried or not.
   /// Takes an error as an input (the result of [validator]), and returns a bool.
-  final RetryTest retryIf;
+  final RetryTest retryIf = RetryIf.alwaysRetry,
 
   /// Dictates what to do with a task that needs to be retried, i.e. should it
   /// return to the back of the queue or be retried immediately?
-  final QueuePolicy retryPolicy;
+  final QueuePolicy retryPolicy = .backOfQueue,
 
   /// Dictates what the Secretary will wait for when `stop()` or `dispose()`
   /// are called.
-  final StopPolicy stopPolicy;
+  final StopPolicy stopPolicy = .finishActive,
 
   /// The maximum number of times to attempt a task before marking it as failed.
-  final int maxAttempts;
+  final int maxAttempts = 1,
 
   /// Dictates what to do with instances of a recurring task.
-  final QueuePolicy recurringQueuePolicy;
+  final QueuePolicy recurringQueuePolicy = .backOfQueue,
 
-  Secretary({
-    this.maxConcurrentTasks = 1,
-    this.checkInterval = const Duration(milliseconds: 50),
-    this.retryDelay = const Duration(milliseconds: 1000),
-    this.taskBuilder,
-    this.validator = Validators.pass,
-    this.recurringValidator = RecurringValidators.pass,
-    this.retryIf = RetryIf.alwaysRetry,
-    this.retryPolicy = .backOfQueue,
-    this.stopPolicy = .finishActive,
-    this.maxAttempts = 1,
-    this.recurringQueuePolicy = .backOfQueue,
-    bool autostart = true,
-  }) {
+  bool autostart = true,
+}) {
+  this {
     if (autostart) start();
   }
 

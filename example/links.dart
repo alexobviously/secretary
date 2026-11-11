@@ -85,19 +85,11 @@ Future<Result<FirestoreDoc, int>> createDoc(StorageFile file) async {
       : Result.ok(FirestoreDoc(id: id, fileId: file.id));
 }
 
-class FileData {
-  final String id;
-  final String data;
-  const FileData(this.id, this.data);
-}
+class const FileData(final String id, final String data);
 
-class StorageFile {
-  final String id;
-  const StorageFile(this.id);
-}
+class const StorageFile(final String id);
 
-class FirestoreDoc {
-  final String id;
-  final String fileId;
-  const FirestoreDoc({required this.id, required this.fileId});
-}
+class const FirestoreDoc({
+  required final String id,
+  required final String fileId,
+});
